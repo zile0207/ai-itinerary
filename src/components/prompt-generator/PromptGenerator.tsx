@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PromptFormData, FormStep, FORM_STEPS, StepValidation } from '@/types/prompt';
 import { DestinationStep } from './steps/DestinationStep';
-import { DateStep } from './steps/DateStep';
+import { DatesStep } from './steps/DatesStep';
 import { TravelersStep } from './steps/TravelersStep';
 import { InterestsStep } from './steps/InterestsStep';
 import { BudgetStep } from './steps/BudgetStep';
@@ -32,6 +32,7 @@ const getInitialFormData = (initialData?: Partial<PromptFormData>): PromptFormDa
     ...initialData?.dateRange
   },
   travelers: {
+    travelers: [],
     adults: 2,
     children: 0,
     childrenAges: [],
@@ -151,7 +152,7 @@ export const PromptGenerator: React.FC<PromptGeneratorProps> = ({
       case 'destination':
         return <DestinationStep {...commonProps} />;
       case 'dates':
-        return <DateStep {...commonProps} />;
+        return <DatesStep {...commonProps} />;
       case 'travelers':
         return <TravelersStep {...commonProps} />;
       case 'interests':

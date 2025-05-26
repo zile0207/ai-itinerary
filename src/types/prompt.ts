@@ -14,10 +14,20 @@ export interface DateRangeData {
   flexibility?: 'fixed' | 'flexible' | 'very-flexible';
 }
 
+export interface Traveler {
+  id: string;
+  name: string;
+  type: 'adult' | 'child' | 'infant';
+  age?: number;
+  tags: string[];
+}
+
 export interface TravelerData {
-  adults: number;
-  children: number;
-  childrenAges: number[];
+  travelers: Traveler[];
+  // Legacy fields for backward compatibility
+  adults?: number;
+  children?: number;
+  childrenAges?: number[];
   relationships?: string[];
   accessibility?: string[];
 }
