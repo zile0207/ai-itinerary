@@ -1,0 +1,666 @@
+# AI Itinerary App – Product Requirements Document
+
+**Version:** 1.0
+
+**Date:** May 25, 2025
+
+**Author:** Zi Le
+
+## Overview
+
+This Product Requirements Document (PRD) outlines the development specifications for the AI Itinerary App, a comprehensive travel planning platform that leverages artificial intelligence to streamline the creation, customization, and collaboration of travel itineraries. The document serves as the primary reference for development teams, stakeholders, and quality assurance personnel throughout the product development lifecycle.
+
+## 1. Introduction
+
+The AI Itinerary App represents a revolutionary approach to travel planning, addressing the complex challenges faced by modern travelers in organizing comprehensive trip itineraries. By integrating advanced AI capabilities with intuitive user interfaces and real-time collaboration features, the application transforms the traditionally time-consuming process of travel planning into an efficient, enjoyable experience.
+
+The platform is designed to serve as a one-stop solution for all travel planning needs, from initial destination research through detailed day-by-day activity scheduling, budget management, and collaborative planning with travel companions. The application's AI-driven approach ensures personalized recommendations while maintaining flexibility for user customization.
+
+## 2. Product overview
+
+### 2.1 Vision statement
+
+To democratize travel planning by providing an AI-powered platform that makes comprehensive itinerary creation accessible, collaborative, and enjoyable for travelers of all experience levels.
+
+### 2.2 Product description
+
+The AI Itinerary App is a web-based travel planning platform that combines artificial intelligence, interactive mapping, and collaborative tools to enable users to create detailed travel itineraries efficiently. The application features three core modules: Dashboard for itinerary management, Prompt Generator for AI input collection, and Itinerary Builder for detailed planning and customization.
+
+### 2.3 Key differentiators
+
+- AI-powered itinerary generation in under 10 minutes
+- Real-time collaborative editing with version control
+- Comprehensive trip management including flights, accommodations, and expenses
+- Interactive map integration with drag-and-drop functionality
+- Context-aware AI chat with external content analysis capabilities
+
+## 3. Goals and objectives
+
+### 3.1 Primary objectives
+
+- **Speed**: Enable complete itinerary creation in under 10 minutes from initial input to finalized plan
+- **Personalization**: Deliver data-driven, personalized recommendations for destinations, activities, and logistics
+- **Collaboration**: Provide seamless real-time collaboration tools for group travel planning
+- **Comprehensiveness**: Cover all aspects of trip planning including transportation, accommodation, activities, and budget management
+
+### 3.2 Success metrics
+
+- Average itinerary creation time: < 10 minutes
+- User engagement: > 70% of users complete full itinerary within first session
+- Collaboration adoption: > 40% of itineraries involve multiple collaborators
+- User retention: > 60% monthly active user retention rate
+- Performance: AI itinerary generation response time < 10 seconds
+
+### 3.3 Business objectives
+
+- Achieve 10,000 registered users within first year
+- Maintain cloud infrastructure costs under $500/month
+- Establish partnerships with travel service providers for monetization
+- Build foundation for premium feature expansion
+
+## 4. Target audience
+
+### 4.1 Primary target segments
+
+**Small groups of friends**
+
+- Demographics: Ages 22-35, tech-savvy, moderate to high disposable income
+- Characteristics: Value shared experiences, prefer collaborative planning, active on social media
+- Pain points: Coordination challenges, conflicting preferences, time zone differences for planning
+
+**Students planning graduation trips**
+
+- Demographics: Ages 20-25, limited budget, high digital engagement
+- Characteristics: First-time international travelers, budget-conscious, group decision-making
+- Pain points: Limited travel experience, budget constraints, complex group dynamics
+
+**Small family trips**
+
+- Demographics: Parents aged 30-45 with children, medium to high income
+- Characteristics: Safety-conscious, efficiency-focused, educational travel interests
+- Pain points: Child-friendly activity selection, safety considerations, accommodation requirements
+
+### 4.2 Secondary target segments
+
+**Solo travelers**
+
+- Demographics: Ages 25-40, experienced travelers, flexible schedules
+- Characteristics: Independence-focused, adventure-seeking, budget-flexible
+- Pain points: Safety concerns, local insight access, spontaneous plan changes
+
+### 4.3 User personas
+
+**Primary Persona: Sarah (Group Trip Coordinator)**
+
+- Age: 28, Marketing Professional
+- Context: Organizing annual friend group vacation (4-6 people)
+- Goals: Efficient planning, fair budget distribution, memorable experiences
+- Frustrations: Endless group chats, conflicting preferences, time-consuming research
+
+**Secondary Persona: Mike (Recent Graduate)**
+
+- Age: 22, Recent College Graduate
+- Context: Planning first international trip with college friends
+- Goals: Maximize experiences within budget, discover authentic local culture
+- Frustrations: Limited travel knowledge, budget constraints, group indecision
+
+## 5. Features and requirements
+
+### 5.1 Dashboard module
+
+**Purpose**: Central hub for itinerary management and creation initiation
+
+**Core features**:
+
+- **Itinerary creation launcher**: Prominent call-to-action directing users to prompt generator
+- **Itinerary management grid**: Visual grid layout displaying itinerary thumbnails with key details
+- **Quick actions**: Create, duplicate, delete, and share functionality for each itinerary
+- **Search and filtering**: Text-based search by destination, dates, or itinerary name
+- **Recent activity**: Timeline of recent edits and collaborator activities
+
+**Technical specifications**:
+
+- Responsive grid layout supporting 1-4 columns based on screen size
+- Thumbnail generation from map screenshots and destination imagery
+- Batch operations for multiple itinerary management
+
+### 5.2 Prompt generator module
+
+**Purpose**: Intelligent data collection interface for AI itinerary generation
+
+**Core features**:
+
+- **Progressive form interface**: Multi-step wizard collecting travel parameters
+- **Map, Calendar and suitable UI elements:** Interactive UI elements paired with multi-step form allow ease of selecting data with visual help
+- **Smart location input**: Natural language processing for destination interpretation
+- **Context integration**: URL analysis for blog posts and video content
+- **Preference mapping**: Interest categorization and activity type selection
+- **Budget configuration**: Flexible budget setting with currency conversion
+- **Preview and validation**: Summary review before AI processing
+
+**Input categories**:
+
+- **Destination**: Geographic locations, descriptive preferences, or experience types
+- **Travel dates**: Flexible date ranges with duration specification
+- **Group composition**: Traveler count, ages, and relationship dynamics
+- **Interests**: Activity preferences, cultural interests, and experience priorities
+- **Budget**: Total budget, daily limits, and spending category allocation
+- **External context**: Blog URLs, video links, and reference materials
+
+**Technical specifications**:
+
+- Natural language processing for location interpretation
+- Web scraping capabilities for content analysis
+- API integration with currency conversion services
+- Form state persistence for session continuity
+
+### 5.3 Itinerary builder module
+
+**Purpose**: Comprehensive itinerary editing and collaboration environment
+
+**Core components**:
+
+### 5.3.1 Interactive map integration
+
+- **Map display**: Full-featured mapping with location details and imagery
+- **Location discovery**: Search and explore points of interest
+- **Route visualization**: Day-by-day route mapping with optimization suggestions
+- **Drag-and-drop functionality**: Direct activity addition from map to itinerary
+- **Location details**: Comprehensive information panels with user reviews and photos
+
+### 5.3.2 Activity organization system
+
+- **Dual-view toggle**: Switch between Kanban board and timeline views
+- **Drag-and-drop editing**: Reorder activities within and between days
+- **Activity customization**: Edit details, add notes, and set time allocations
+- **Route optimization**: AI-suggested activity ordering for efficiency
+- **Activity templates**: Common activity types with default durations and details
+
+### 5.3.3 AI chat assistant
+
+- **Context-aware responses**: Full itinerary context for personalized suggestions
+- **Recommendation engine**: Activity, restaurant, and attraction suggestions
+- **Problem solving**: Address logistics, timing, and preference conflicts
+- **External content integration**: Analyze user-provided links for additional context
+- **Multi-modal input**: Text and link-based interaction capabilities
+
+### 5.3.4 Collaboration features
+
+- **Real-time editing**: Simultaneous multi-user editing with conflict resolution
+- **User presence indicators**: Show active collaborators and their current focus areas
+- **Comment system**: Activity-specific and general itinerary comments
+- **Version history**: Complete edit tracking with rollback capabilities
+- **Permission management**: Owner, editor, and viewer role assignments
+
+### 5.3.5 Trip management tools
+
+- **Flight tracking**: Flight detail storage with real-time status updates
+- **Accommodation management**: Booking details, check-in/out tracking, and notes
+- **Budget tracking**: Automated expense calculation with category breakdown
+- **Traveler profiles**: Individual preferences, dietary restrictions, and contact information
+- **Notes system**: Flexible note-taking with rich text formatting capabilities
+
+**Technical specifications**:
+
+- WebSocket implementation for real-time collaboration
+- Conflict resolution algorithms for simultaneous editing
+- Integration with flight status APIs
+- Automated expense categorization and calculation
+- Rich text editor for notes and comments
+
+### 5.4 Cross-platform features
+
+### 5.4.1 Sharing and export
+
+- **PDF export**: Professionally formatted itinerary documents
+- **Link sharing**: Shareable URLs with permission controls
+
+### 5.4.2 User management
+
+- **Profile management**: Personal information, preferences, and travel history
+- **Authentication**: Secure login with social media integration options
+- **Privacy controls**: Data sharing preferences and visibility settings
+
+## 6. User stories and acceptance criteria
+
+### 6.1 Authentication and user management
+
+**ST-101: User account creation**
+As a new user, I want to create an account using email or social media login so that I can save and manage my travel itineraries.
+
+*Acceptance criteria*:
+
+- User can register with email and password
+- User can register using Google or Facebook OAuth
+- Email verification required for email registration
+- User profile automatically created upon successful registration
+- User redirected to dashboard after account creation
+
+**ST-102: Secure user authentication**
+As a returning user, I want to securely log into my account so that I can access my saved itineraries and personal information.
+
+*Acceptance criteria*:
+
+- User can log in with email/password or social media accounts
+- Failed login attempts are limited and tracked
+- Password reset functionality available via email
+- Session management with automatic logout after inactivity
+- Two-factor authentication option available
+
+### 6.2 Database and data management
+
+**ST-103: Data persistence and synchronization**
+As a user, I want my itinerary data to be securely stored so that I can access my plans from anywhere.
+
+*Acceptance criteria*:
+
+- All user data encrypted in transit and at rest
+- Data backup and recovery capabilities
+- GDPR-compliant data handling and deletion options
+
+### 6.3 Dashboard functionality
+
+**ST-104: Itinerary overview management**
+As a user, I want to view all my itineraries in an organized dashboard so that I can quickly access and manage my travel plans.
+
+*Acceptance criteria*:
+
+- Display all user itineraries in a visual grid layout
+- Show itinerary thumbnails with destination, dates, and collaborator count
+- Sort itineraries by creation date, travel date, or alphabetically
+- Filter itineraries by status, destination, or date range
+- Display loading states and empty states appropriately
+
+**ST-105: Quick itinerary actions**
+As a user, I want to perform quick actions on my itineraries from the dashboard so that I can efficiently manage multiple travel plans.
+
+*Acceptance criteria*:
+
+- Create new itinerary button prominently displayed
+- Duplicate existing itinerary in two clicks
+- Delete itinerary with confirmation dialog
+- Share itinerary via link generation
+- Open itinerary in builder with single click
+
+**ST-106: Itinerary search functionality**
+As a user with multiple itineraries, I want to search for specific trips so that I can quickly locate the itinerary I need.
+
+*Acceptance criteria*:
+
+- Search by destination name or country
+- Search by travel dates or date ranges
+- Search by itinerary title or notes
+- Real-time search results with highlighting
+- Clear search functionality with results reset
+
+### 6.4 Prompt generator workflows
+
+**ST-107: Flexible destination input**
+As a user, I want to describe my ideal destination in natural language so that the AI can suggest appropriate locations even when I don't have a specific place in mind.
+
+*Acceptance criteria*:
+
+- Accept specific location names (cities, countries, regions)
+- Process descriptive inputs like "beach destination in Europe"
+- Suggest location options based on natural language descriptions
+- Allow multiple destination selection for multi-city trips
+- Validate and confirm location interpretations with user
+
+**ST-108: Comprehensive travel preference collection**
+As a user, I want to specify my travel preferences and requirements so that the AI generates a personalized itinerary matching my interests and constraints.
+
+*Acceptance criteria*:
+
+- Collect travel dates with flexible date range options
+- Specify group size and traveler demographics
+- Select activity categories and interest types
+- Set budget parameters with currency selection
+- Indicate accessibility requirements and dietary restrictions
+- Allow skipping of optional preference sections
+
+**ST-109: External content integration**
+As a user, I want to share blog posts or videos that inspire my trip so that the AI can understand my vision and include similar experiences in my itinerary.
+
+*Acceptance criteria*:
+
+- Accept URLs from major blog platforms and video sites
+- Extract key locations and activities from provided content
+- Display summary of analyzed content for user confirmation
+- Allow multiple URL submissions per itinerary
+- Handle invalid or inaccessible URLs gracefully
+
+**ST-110: Itinerary generation preview**
+As a user, I want to review all my inputs before generating the itinerary so that I can make adjustments and ensure accuracy.
+
+*Acceptance criteria*:
+
+- Display comprehensive summary of all user inputs
+- Allow adding of new and editing of any input section without losing other data
+- Show estimated itinerary generation time
+- Provide clear call-to-action for itinerary generation
+- Save draft inputs for later completion
+
+### 6.5 Itinerary builder core functionality
+
+**ST-111: Interactive map navigation**
+As a user, I want to explore my destination on an interactive map so that I can discover points of interest and understand the geographic layout of my trip.
+
+*Acceptance criteria*:
+
+- Display high-quality interactive map of destination area
+- Show points of interest with categorized icons
+- Provide detailed information panels for each location
+- Support map zooming and panning with smooth performance
+- Display user's planned activities with distinct visual indicators
+
+**ST-112: Drag-and-drop activity management**
+As a user, I want to add activities to my itinerary by dragging locations from the map so that I can intuitively build my daily plans.
+
+*Acceptance criteria*:
+
+- Enable dragging location cards from map to itinerary days
+- Provide visual feedback during drag operations
+- Support dropping activities on specific time slots
+- Allow dragging activities between different days
+- Remove activities by dragging them outside the itinerary area
+
+**ST-113: Flexible itinerary view options**
+As a user, I want to switch between timeline and Kanban views of my itinerary so that I can organize my activities in the format that works best for my planning style.
+
+*Acceptance criteria*:
+
+- Toggle between timeline and Kanban board views seamlessly
+- Maintain activity organization when switching views
+- Timeline view shows activities with time allocations
+- Kanban view organizes activities by day without strict timing
+- Preserve user's last selected view preference
+
+**ST-114: Activity customization**
+As a user, I want to edit activity details and add personal notes so that I can customize my itinerary with specific information and preferences.
+
+*Acceptance criteria*:
+
+- Edit activity names, descriptions, and duration
+- Add personal notes and comments to activities
+- Set activity categories and priority levels
+- Include booking information and confirmation numbers
+- Add estimated costs for budget tracking
+
+**ST-115: Route optimization**
+As a user, I want the AI to suggest optimal activity ordering so that I can minimize travel time and maximize my daily efficiency.
+
+*Acceptance criteria*:
+
+- Analyze geographic proximity of planned activities
+- Suggest reordering activities to reduce travel time
+- Consider activity operating hours and scheduling constraints
+- Provide alternative routing options with time estimates
+- Allow users to accept or reject optimization suggestions
+
+### 6.6 AI chat and assistance
+
+**ST-116: Context-aware AI recommendations**
+As a user, I want to chat with an AI assistant that understands my complete itinerary so that I can get personalized suggestions and solve planning problems.
+
+*Acceptance criteria*:
+
+- AI has access to complete itinerary context and user preferences
+- Provide relevant activity and restaurant recommendations
+- Answer questions about logistics and local information
+- Suggest solutions for timing conflicts and scheduling issues
+- Maintain conversation history throughout the session
+
+**ST-117: External content analysis for AI**
+As a user, I want to share additional blog posts or videos with the AI during planning so that it can provide suggestions based on content that inspires me.
+
+*Acceptance criteria*:
+
+- Accept URLs for real-time content analysis
+- Extract relevant locations and activities from shared content
+- Provide AI recommendations based on analyzed content
+- Display summary of content analysis for user understanding
+- Allow AI to reference shared content in ongoing conversations
+
+### 6.7 Collaboration features
+
+**ST-118: Real-time collaborative editing**
+As a user planning a group trip, I want to invite friends to collaborate on our itinerary so that everyone can contribute to the planning process.
+
+*Acceptance criteria*:
+
+- Send collaboration invitations via email or shareable link
+- Support simultaneous editing by multiple users
+- Display real-time presence indicators for active collaborators
+- Implement conflict resolution for simultaneous edits
+- Maintain performance with multiple concurrent users
+
+**ST-119: Collaboration communication**
+As a collaborator, I want to communicate with other team members within the itinerary so that we can discuss plans and make decisions together.
+
+*Acceptance criteria*:
+
+- Add comments to specific activities and itinerary sections
+- Send messages in general itinerary chat
+- Tag other collaborators in comments and messages
+- Receive notifications for new comments and replies
+- Mark comments as resolved when issues are addressed
+
+**ST-120: Version control and change tracking**
+As a user, I want to see who made changes to our itinerary and when so that I can track the evolution of our plans and revert changes if necessary.
+
+*Acceptance criteria*:
+
+- Display complete edit history with timestamps and user attribution
+- Show specific changes made in each edit session
+- Allow reverting to previous versions of the itinerary
+- Highlight recent changes for easy identification
+- Provide change notifications to all collaborators
+
+### 6.8 Trip management tools
+
+**ST-121: Flight information management**
+As a user, I want to add and track flight details so that I can keep all my travel information in one place and receive updates about flight status.
+
+*Acceptance criteria*:
+
+- Add flight numbers, departure/arrival times, and airport information
+- Display real-time flight status updates when available
+- Calculate and display total travel time including layovers
+- Send notifications for flight delays or gate changes
+- Support multiple flight segments for complex routing
+
+**ST-122: Accommodation tracking**
+As a user, I want to manage my accommodation details so that I can track check-in/out dates, addresses, and booking confirmations.
+
+*Acceptance criteria*:
+
+- Store hotel/accommodation booking information
+- Display accommodation locations on the itinerary map
+- Track check-in and check-out dates with calendar integration
+- Add notes about accommodation amenities and policies
+- Include contact information and booking confirmation numbers
+
+**ST-123: Automated budget and expense tracking**
+As a user, I want my expenses to be automatically calculated based on my planned activities so that I can monitor my budget throughout the planning process.
+
+*Acceptance criteria*:
+
+- Automatically sum activity costs and display total budget
+- Categorize expenses by type (accommodation, food, activities, transport)
+- Split costs among travelers when applicable
+- Display budget vs. actual spending comparisons
+- Alert users when approaching or exceeding budget limits
+- Support multiple currencies with automatic conversion
+
+**ST-124: Traveler profile management**
+As a user, I want to manage information about all travelers so that I can ensure activities and plans accommodate everyone's needs and preferences.
+
+*Acceptance criteria*:
+
+- Add traveler names, ages, and contact information
+- Record dietary restrictions and food allergies
+- Note accessibility requirements and mobility considerations
+- Track individual budgets and expense splitting preferences
+- Store emergency contact information for each traveler
+
+### 6.9 Notes and documentation
+
+**ST-125: Flexible note-taking system**
+As a user, I want to add notes and documentation to my itinerary so that I can keep track of important information, packing lists, and trip preparation tasks.
+
+*Acceptance criteria*:
+
+- Create rich text notes with formatting options
+- Organize notes by categories or tags
+- Attach notes to specific days or activities
+- Create shared notes visible to all collaborators
+- Support checklists for packing and preparation tasks
+
+### 6.10 Sharing and export functionality
+
+**ST-126: Itinerary sharing and export**
+As a user, I want to share my completed itinerary with others and export it for offline use so that I can distribute plans and access them during travel.
+
+*Acceptance criteria*:
+
+- Generate shareable links with customizable permissions
+- Export itineraries as formatted PDF documents
+- Include maps and activity details in exported documents
+- Create mobile-friendly versions for on-trip access
+- Allow sharing on social media platforms with preview images
+
+### 6.11 Edge cases and error handling
+
+**ST-127: Offline functionality**
+As a user traveling internationally, I want to access my itinerary even when I have limited internet connectivity so that I can reference my plans regardless of network availability.
+
+*Acceptance criteria*:
+
+- Cache itinerary data for offline access
+- Sync changes when connectivity is restored
+- Display offline status indicators clearly
+- Provide essential information without requiring network access
+- Handle graceful degradation of features requiring internet
+
+**ST-128: Data recovery and backup**
+As a user, I want assurance that my itinerary data is protected so that I won't lose my travel plans due to technical issues.
+
+*Acceptance criteria*:
+
+- Automatic backup of all itinerary data
+- Recovery options for accidentally deleted content
+- Export functionality for user-controlled backups
+- Data retention policies clearly communicated
+- Disaster recovery procedures for service interruptions
+
+## 7. Technical requirements / stack
+
+### 7.1 Architecture overview
+
+- **Frontend**: React.js with TypeScript for type safety and modern development practices. Use shadcn and tailwindcss as well.
+- **Backend**: Node.js with Express.js framework for API development
+- **Database**: PostgreSQL for primary data storage with Redis for caching and session management
+- **AI Integration**: OpenAI GPT-4 API for natural language processing and itinerary generation
+- **Real-time Communication**: Socket.io for collaborative editing and live updates
+- **File Storage**: AWS S3 for user-uploaded content and generated documents
+
+### 7.2 Performance requirements
+
+- **Response Time**: API responses under 300ms for 95% of requests
+- **Itinerary Generation**: Complete AI itinerary generation within 10 seconds
+- **Concurrent Users**: Support minimum 100 simultaneous active users
+- **Uptime**: 99.5% service availability target
+- **Mobile Performance**: Page load times under 3 seconds on 3G connections
+
+### 7.3 Security requirements
+
+- **Data Encryption**: TLS 1.3 for data in transit, AES-256 encryption for data at rest
+- **Authentication**: JWT tokens with secure refresh mechanism
+- **API Security**: Rate limiting, input validation, and SQL injection prevention
+- **Privacy Compliance**: GDPR and CCPA compliant data handling
+- **Access Control**: Role-based permissions for collaboration features
+
+### 7.4 Scalability considerations
+
+- **Horizontal Scaling**: Containerized deployment with Kubernetes orchestration
+- **Database Optimization**: Read replicas and connection pooling for database performance
+- **CDN Integration**: Global content delivery for static assets and images
+- **Caching Strategy**: Multi-level caching with Redis and browser caching
+- **Load Balancing**: Application load balancer for traffic distribution
+
+### 7.5 Third-party integrations
+
+- **Mapping Services**: Google Maps API for interactive maps and geocoding
+- **Flight Data**: FlightAware or similar API for real-time flight information
+- **Currency Exchange**: Exchange rates API for budget calculations
+- **Content Analysis**: Natural language processing for blog/video content extraction
+- **Email Services**: SendGrid or AWS SES for transactional emails
+
+### 7.6 Development and deployment
+
+- **Version Control**: Git with feature branch workflow
+- **CI/CD Pipeline**: Automated testing and deployment with GitHub Actions
+- **Environment Management**: Development, staging, and production environments
+- **Monitoring**: Application performance monitoring with error tracking
+- **Documentation**: API documentation with OpenAPI/Swagger specification
+
+## 8. Design and user interface
+
+### 8.1 Design principles
+
+- **Simplicity**: Clean, uncluttered interface prioritizing essential functionality
+- **Accessibility**: WCAG 2.1 AA compliance for inclusive user experience
+- **Web Only:** Website design only with considerations of responsiveness for different monitor sizes
+- **Visual Hierarchy**: Clear information architecture with logical content organization
+- **Consistency**: Unified design language across all application modules
+- **Spacing:** Using 4 point grid system as much as possible
+
+### 8.2 User interface specifications
+
+### 8.2.1 Dashboard design
+
+- **Layout**: Card-based grid system with responsive breakpoints
+- **Visual Elements**: High-quality destination imagery with overlay text
+- **Navigation**: Primary navigation bar with user profile and settings access
+- **Information Density**: Balanced content presentation avoiding cognitive overload
+- **Interactive Elements**: Hover states and micro-interactions for enhanced usability
+
+### 8.2.2 Prompt generator interface
+
+- **Progressive Disclosure**: Multi-step wizard with clear progress indication
+- **Form Design with Interactive Elements**: Intuitive input fields with helpful placeholder text and validation coupled with an interactive design fitting for the input section
+- **Visual Feedback**: Real-time validation and confirmation of user inputs
+- **Context Integration**: Preview panels for analyzed external content
+- **Accessibility**: Screen reader compatibility and keyboard navigation support
+
+### 8.2.3 Itinerary builder layout
+
+- **Split-Screen Design**: Map on left, itinerary organization on right with flexible resizing
+- **Drag-and-Drop Visual Cues**: Clear indicators for draggable elements and drop zones
+- **Multi-Panel Interface**: Collapsible panels for chat, notes, and trip details
+- **Timeline/Kanban Views**: Distinct visual treatments for different organizational methods
+- **Collaboration Indicators**: User presence avatars and real-time activity indicators
+
+### 8.3 Responsive design requirements
+
+- **Desktop Enhancement**: Full feature utilization on larger screens
+- **Cross-Browser Compatibility**: Support for modern browsers with graceful degradation
+- **Performance Optimization**: Efficient loading and rendering across all device types
+
+### 8.4 Accessibility standards
+
+- **WCAG 2.1 AA Compliance**: Full adherence to accessibility guidelines
+- **Keyboard Navigation**: Complete functionality accessible via keyboard
+- **Screen Reader Support**: Proper semantic markup and ARIA labels
+- **Color Accessibility**: Sufficient contrast ratios and color-blind friendly palette
+- **Alternative Text**: Descriptive alt text for all images and visual content
+
+### 8.5 Brand and visual identity
+
+Reference from Airbnb
+
+- **Color Palette**: Travel-inspired colors with professional, trustworthy appearance
+- **Typography**: Clear, readable fonts optimized for digital consumption
+- **Iconography**: Consistent icon set with travel and navigation themes
+- **Imagery Style**: High-quality photography emphasizing travel experiences
+- **Logo Integration**: Cohesive brand presence throughout the application

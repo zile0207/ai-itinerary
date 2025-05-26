@@ -1,0 +1,41 @@
+# Manual Inputs Needed Later
+
+## API Keys Required:
+1. **OpenAI API Key** - For GPT-4 itinerary generation (Task 5)
+   - Environment variable: OPENAI_API_KEY
+   - Used in: src/app/api/generate-itinerary/route.ts
+
+2. **Google Maps API Key** - For map integration and geocoding (Task 6)
+   - Environment variable: GOOGLE_MAPS_API_KEY
+   - Used in: Google Maps components, destination selection
+
+3. **Google OAuth Client ID & Secret** - For social login (Task 2)
+   - Environment variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+   - Used in: OAuth authentication flow
+
+4. **Facebook OAuth App ID & Secret** - For social login (Task 2)
+   - Environment variables: FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
+   - Used in: OAuth authentication flow
+
+## Configuration Needed:
+1. **JWT Secret** - For token signing
+   - Environment variable: JWT_SECRET
+   - Generate a secure random string
+
+2. **App Domain** - For OAuth callbacks
+   - Environment variable: NEXTAUTH_URL
+   - Set to your deployment domain
+
+## External Services (Optional):
+1. **Flight API** - For flight tracking (Task 9)
+2. **Email Service** - For email notifications (Task 2)
+
+## Files to Update Later:
+- .env.local (create with above variables)
+- next.config.ts (add domains for external images)
+- OAuth provider configurations
+
+## Notes:
+- All features will work with mock data until these are configured
+- Authentication will use mock users until OAuth is set up
+- Maps will show placeholder until Google Maps API is added 
