@@ -60,7 +60,7 @@ export interface OptimizationOptions {
   minConfidence: number;
   allowReordering: boolean;
   allowDayChanges: boolean;
-  preferredTransport: google.maps.TravelMode;
+  preferredTransport: string; // Changed from google.maps.TravelMode to string
   maxTravelTime: number; // minutes
   considerOpeningHours: boolean;
 }
@@ -72,10 +72,28 @@ class OptimizationServiceClass {
     minConfidence: 60,
     allowReordering: true,
     allowDayChanges: false,
-    preferredTransport: google.maps.TravelMode.DRIVING,
+    preferredTransport: 'DRIVING', // Changed to string literal
     maxTravelTime: 45,
     considerOpeningHours: false
   };
+
+  private isGoogleMapsAvailable(): boolean {
+    return typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps;
+  }
+
+  private getTravelMode(mode: string): any {
+    if (!this.isGoogleMapsAvailable()) {
+      return mode; // Return string if Google Maps not available
+    }
+    
+    switch (mode) {
+      case 'DRIVING': return google.maps.TravelMode.DRIVING;
+      case 'WALKING': return google.maps.TravelMode.WALKING;
+      case 'BICYCLING': return google.maps.TravelMode.BICYCLING;
+      case 'TRANSIT': return google.maps.TravelMode.TRANSIT;
+      default: return google.maps.TravelMode.DRIVING;
+    }
+  }
 
   async analyzeItinerary(
     days: ItineraryDay[],
@@ -185,7 +203,7 @@ class OptimizationServiceClass {
       try {
         // Calculate current route
         const currentResult = await RouteService.calculateMultipleRoutes(locations, {
-          travelMode: options.preferredTransport
+          travelMode: this.getTravelMode(options.preferredTransport)
         });
 
         // Try optimization
@@ -194,7 +212,7 @@ class OptimizationServiceClass {
           locations.slice(1, -1),
           locations[locations.length - 1],
           {
-            travelMode: options.preferredTransport,
+            travelMode: this.getTravelMode(options.preferredTransport),
             optimizeWaypoints: true
           }
         );

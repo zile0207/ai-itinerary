@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Stepper, Step } from '@/components/ui/stepper';
 import { PromptFormData, FormStep, FORM_STEPS, StepValidation } from '@/types/prompt';
 import { DestinationStep } from './steps/DestinationStep';
 import { DatesStep } from './steps/DatesStep';
@@ -187,6 +188,33 @@ export const PromptGenerator: React.FC<PromptGeneratorProps> = ({
     return titles[step];
   };
 
+  const getStepDescription = (step: FormStep) => {
+    const descriptions = {
+      'destination': 'Choose your travel destination',
+      'dates': 'Select your travel dates',
+      'travelers': 'Add travelers and preferences',
+      'interests': 'Select your interests',
+      'budget': 'Set your travel budget',
+      'external-content': 'Add inspiration content',
+      'review': 'Review and generate itinerary'
+    };
+    return descriptions[step];
+  };
+
+  const getSteps = (): Step[] => {
+    return FORM_STEPS.map(step => ({
+      id: step,
+      title: getStepTitle(step),
+      description: getStepDescription(step),
+      status: step === currentStep 
+        ? 'current' 
+        : stepValidations[step].isValid 
+        ? 'completed' 
+        : 'pending',
+      optional: step === 'external-content'
+    }));
+  };
+
   return (
     <div className={`max-w-4xl mx-auto p-6 ${className}`}>
       <Card>
@@ -204,49 +232,15 @@ export const PromptGenerator: React.FC<PromptGeneratorProps> = ({
             </div>
           </div>
 
-          {/* Step Navigation */}
-          <div className="flex justify-center">
-            <div className="flex space-x-2 overflow-x-auto pb-2">
-              {FORM_STEPS.map((step, index) => {
-                const isCompleted = index < currentStepIndex;
-                const isCurrent = step === currentStep;
-                const isAccessible = index <= currentStepIndex || 
-                  (index === currentStepIndex + 1 && canProceedToNext());
-
-                return (
-                  <button
-                    key={step}
-                    onClick={() => handleStepClick(step)}
-                    disabled={!isAccessible}
-                    className={`
-                      flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium
-                      transition-colors duration-200 whitespace-nowrap
-                      ${isCurrent 
-                        ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
-                        : isCompleted
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : isAccessible
-                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                      }
-                    `}
-                  >
-                    <span className={`
-                      w-5 h-5 rounded-full flex items-center justify-center text-xs
-                      ${isCurrent 
-                        ? 'bg-blue-600 text-white'
-                        : isCompleted
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-300 text-gray-600'
-                      }
-                    `}>
-                      {isCompleted ? '✓' : index + 1}
-                    </span>
-                    <span className="hidden sm:inline">{getStepTitle(step)}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Step Navigation - Enhanced Stepper */}
+          <div className="px-4">
+            <Stepper
+              steps={getSteps()}
+              currentStep={currentStep}
+              onStepClick={(stepId) => handleStepClick(stepId as FormStep)}
+              orientation="horizontal"
+              allowClickthrough={true}
+            />
           </div>
         </CardHeader>
 

@@ -26,8 +26,8 @@ app.prepare().then(() => {
   // Initialize Socket.io
   let socketServer;
   try {
-    const { initializeSocketServer } = require('./src/lib/socket/server.js');
-    socketServer = initializeSocketServer(server);
+    const { initializeSocketIO } = require('./src/lib/socket/server.js');
+    socketServer = initializeSocketIO(server);
     console.log('[Server] Socket.io server initialized successfully');
   } catch (error) {
     console.error('[Server] Failed to initialize Socket.io:', error);

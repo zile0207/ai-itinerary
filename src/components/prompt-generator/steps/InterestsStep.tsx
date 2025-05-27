@@ -46,6 +46,22 @@ const SPECIAL_INTERESTS = [
   'Budget Travel', 'Accessibility Focused'
 ];
 
+type InterestsKey = keyof import('@/types/prompt').InterestsData;
+const getInterestsKey = (category: string): InterestsKey => {
+  switch (category) {
+    case 'accommodation':
+      return 'accommodationTypes';
+    case 'transportation':
+      return 'transportationModes';
+    case 'dining':
+      return 'diningPreferences';
+    case 'special':
+      return 'specialInterests';
+    default:
+      return 'activities';
+  }
+};
+
 export const InterestsStep: React.FC<StepContentProps> = ({
   data,
   updateData,
@@ -55,21 +71,13 @@ export const InterestsStep: React.FC<StepContentProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('activities');
 
-  const interests = useMemo(() => data.interests || {
-    activities: [],
-    accommodationTypes: [],
-    transportationModes: [],
-    diningPreferences: [],
-    specialInterests: []
-  }, [data.interests]);
-
   const validateStep = useCallback(() => {
     const totalSelections = 
-      interests.activities.length +
-      interests.accommodationTypes.length +
-      interests.transportationModes.length +
-      interests.diningPreferences.length +
-      interests.specialInterests.length;
+      data.interests.activities.length +
+      data.interests.accommodationTypes.length +
+      data.interests.transportationModes.length +
+      data.interests.diningPreferences.length +
+      data.interests.specialInterests.length;
 
     const isValid = totalSelections >= 3; // Require at least 3 total selections
     const errors = [];
@@ -79,21 +87,20 @@ export const InterestsStep: React.FC<StepContentProps> = ({
     }
 
     updateValidation('interests', { isValid, errors });
-  }, [interests, updateValidation]);
+  }, [data.interests, updateValidation]);
 
   useEffect(() => {
-    updateData('interests', interests);
     validateStep();
-  }, [interests, updateData, validateStep]);
+  }, [validateStep]);
 
-  const toggleSelection = (category: keyof typeof interests, item: string) => {
-    const currentItems = interests[category];
+  const toggleSelection = (category: keyof typeof data.interests, item: string) => {
+    const currentItems = data.interests[category];
     const newItems = currentItems.includes(item)
       ? currentItems.filter(i => i !== item)
       : [...currentItems, item];
 
     updateData('interests', {
-      ...interests,
+      ...data.interests,
       [category]: newItems
     });
   };
@@ -108,15 +115,15 @@ export const InterestsStep: React.FC<StepContentProps> = ({
   const getCategoryData = (category: string) => {
     switch (category) {
       case 'activities':
-        return { options: ACTIVITY_OPTIONS, selected: interests.activities, icon: MapPin };
+        return { options: ACTIVITY_OPTIONS, selected: data.interests.activities, icon: MapPin };
       case 'accommodation':
-        return { options: ACCOMMODATION_OPTIONS, selected: interests.accommodationTypes, icon: Home };
+        return { options: ACCOMMODATION_OPTIONS, selected: data.interests.accommodationTypes, icon: Home };
       case 'transportation':
-        return { options: TRANSPORTATION_OPTIONS, selected: interests.transportationModes, icon: Car };
+        return { options: TRANSPORTATION_OPTIONS, selected: data.interests.transportationModes, icon: Car };
       case 'dining':
-        return { options: DINING_OPTIONS, selected: interests.diningPreferences, icon: Utensils };
+        return { options: DINING_OPTIONS, selected: data.interests.diningPreferences, icon: Utensils };
       case 'special':
-        return { options: SPECIAL_INTERESTS, selected: interests.specialInterests, icon: Heart };
+        return { options: SPECIAL_INTERESTS, selected: data.interests.specialInterests, icon: Heart };
       default:
         return { options: [], selected: [], icon: Heart };
     }
@@ -131,11 +138,11 @@ export const InterestsStep: React.FC<StepContentProps> = ({
   ];
 
   const getTotalSelections = () => {
-    return interests.activities.length +
-           interests.accommodationTypes.length +
-           interests.transportationModes.length +
-           interests.diningPreferences.length +
-           interests.specialInterests.length;
+    return data.interests.activities.length +
+           data.interests.accommodationTypes.length +
+           data.interests.transportationModes.length +
+           data.interests.diningPreferences.length +
+           data.interests.specialInterests.length;
   };
 
   const categoryData = getCategoryData(activeCategory);
@@ -159,29 +166,25 @@ export const InterestsStep: React.FC<StepContentProps> = ({
       {/* Category Navigation */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {categories.map((category) => {
               const Icon = category.icon;
               const isActive = activeCategory === category.id;
-              const categoryKey = category.id === 'accommodation' ? 'accommodationTypes' :
-                                category.id === 'transportation' ? 'transportationModes' :
-                                category.id === 'dining' ? 'diningPreferences' :
-                                category.id === 'special' ? 'specialInterests' :
-                                category.id;
-              const count = interests[categoryKey as keyof typeof interests]?.length || 0;
+              const categoryKey: InterestsKey = getInterestsKey(category.id);
+              const count = data.interests[categoryKey]?.length || 0;
 
               return (
                 <Button
                   key={category.id}
                   variant={isActive ? "default" : "outline"}
-                  size="sm"
+                  size="default"
                   onClick={() => setActiveCategory(category.id)}
-                  className="flex flex-col items-center space-y-1 h-auto py-3"
+                  className="flex flex-col items-center space-y-1 h-16 py-3 px-4 min-h-[64px] hover:scale-[1.02] transition-transform"
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-xs">{category.label}</span>
+                  <Icon className="w-5 h-5" />
+                  <span className="text-sm font-medium text-center leading-tight">{category.label}</span>
                   {count > 0 && (
-                    <Badge variant="secondary" className="text-xs px-1 py-0">
+                    <Badge variant="secondary" className="text-xs px-2 py-0">
                       {count}
                     </Badge>
                   )}
@@ -219,24 +222,20 @@ export const InterestsStep: React.FC<StepContentProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {filteredOptions.map((option) => {
               const isSelected = categoryData.selected.includes(option);
-              const categoryKey = activeCategory === 'accommodation' ? 'accommodationTypes' :
-                                activeCategory === 'transportation' ? 'transportationModes' :
-                                activeCategory === 'dining' ? 'diningPreferences' :
-                                activeCategory === 'special' ? 'specialInterests' :
-                                'activities';
+              const categoryKey: InterestsKey = getInterestsKey(activeCategory);
 
               return (
                 <Button
                   key={option}
                   variant={isSelected ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleSelection(categoryKey as keyof typeof interests, option)}
-                  className="text-left justify-start h-auto py-2 px-3"
+                  size="default"
+                  onClick={() => toggleSelection(categoryKey, option)}
+                  className="text-left justify-start h-12 px-4 py-3 min-h-[48px] w-full hover:scale-[1.02] transition-transform"
                 >
-                  <span className="text-xs">{option}</span>
+                  <span className="text-sm font-medium leading-tight">{option}</span>
                 </Button>
               );
             })}
@@ -266,11 +265,11 @@ export const InterestsStep: React.FC<StepContentProps> = ({
             <CardTitle className="text-blue-900">Your Selections</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {interests.activities.length > 0 && (
+            {data.interests.activities.length > 0 && (
               <div>
                 <Label className="text-sm font-medium text-blue-800">Activities</Label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {interests.activities.map((activity) => (
+                  {data.interests.activities.map((activity) => (
                     <Badge key={activity} variant="secondary" className="text-xs">
                       {activity}
                     </Badge>
@@ -279,11 +278,11 @@ export const InterestsStep: React.FC<StepContentProps> = ({
               </div>
             )}
 
-            {interests.accommodationTypes.length > 0 && (
+            {data.interests.accommodationTypes.length > 0 && (
               <div>
                 <Label className="text-sm font-medium text-blue-800">Accommodation</Label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {interests.accommodationTypes.map((type) => (
+                  {data.interests.accommodationTypes.map((type) => (
                     <Badge key={type} variant="secondary" className="text-xs">
                       {type}
                     </Badge>
@@ -292,11 +291,11 @@ export const InterestsStep: React.FC<StepContentProps> = ({
               </div>
             )}
 
-            {interests.transportationModes.length > 0 && (
+            {data.interests.transportationModes.length > 0 && (
               <div>
                 <Label className="text-sm font-medium text-blue-800">Transportation</Label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {interests.transportationModes.map((mode) => (
+                  {data.interests.transportationModes.map((mode) => (
                     <Badge key={mode} variant="secondary" className="text-xs">
                       {mode}
                     </Badge>
@@ -305,11 +304,11 @@ export const InterestsStep: React.FC<StepContentProps> = ({
               </div>
             )}
 
-            {interests.diningPreferences.length > 0 && (
+            {data.interests.diningPreferences.length > 0 && (
               <div>
                 <Label className="text-sm font-medium text-blue-800">Dining</Label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {interests.diningPreferences.map((pref) => (
+                  {data.interests.diningPreferences.map((pref) => (
                     <Badge key={pref} variant="secondary" className="text-xs">
                       {pref}
                     </Badge>
@@ -318,11 +317,11 @@ export const InterestsStep: React.FC<StepContentProps> = ({
               </div>
             )}
 
-            {interests.specialInterests.length > 0 && (
+            {data.interests.specialInterests.length > 0 && (
               <div>
                 <Label className="text-sm font-medium text-blue-800">Special Interests</Label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {interests.specialInterests.map((interest) => (
+                  {data.interests.specialInterests.map((interest) => (
                     <Badge key={interest} variant="secondary" className="text-xs">
                       {interest}
                     </Badge>

@@ -4,6 +4,14 @@ import { useState, useCallback } from 'react';
 import { Calendar, Map, LayoutGrid, Settings, Plus, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// shadcn UI imports
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+
 import { DragDropProvider, useDragAndDrop } from './DragDropProvider';
 import { TimelineView, ItineraryDay, ItineraryActivity } from './TimelineView';
 import { KanbanView, KanbanGroupBy } from './KanbanView';
@@ -120,70 +128,72 @@ export function ItineraryBuilder({
       onTimeSlotDrop={handleTimeSlotDrop}
       disabled={readOnly}
     >
-      <div className={cn('flex flex-col h-full bg-gray-50', className)}>
+      <Card className={cn('flex flex-col h-full', className)}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-white border-b">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-gray-900">Itinerary Builder</h1>
-            
-            {/* View Mode Selector */}
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
-              {viewModeButtons.map(({ mode, icon: Icon, label }) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    viewMode === mode
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  )}
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <CardTitle className="text-xl font-semibold text-gray-900">Itinerary Builder</CardTitle>
+              
+              {/* Activity Count Badge */}
+              <Badge variant="secondary" className="text-xs">
+                {days.reduce((total, day) => total + day.activities.length, 0)} activities
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Kanban Group By Selector */}
+              {viewMode === 'kanban' && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Group by:</span>
+                  <Select value={kanbanGroupBy} onValueChange={(value: KanbanGroupBy) => setKanbanGroupBy(value)}>
+                    <SelectTrigger className="w-[140px] h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="day">Day</SelectItem>
+                      <SelectItem value="type">Activity Type</SelectItem>
+                      <SelectItem value="status">Status</SelectItem>
+                      <SelectItem value="location">Location</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Add Activity Button */}
+              {!readOnly && (
+                <Button
+                  onClick={() => handleActivityAddWrapper(days[0]?.id || 'day-1')}
+                  className="h-8"
+                  size="sm"
                 >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </button>
-              ))}
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Activity
+                </Button>
+              )}
+
+              {/* Settings */}
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Settings className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Kanban Group By Selector */}
-            {viewMode === 'kanban' && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Group by:</span>
-                <select
-                  value={kanbanGroupBy}
-                  onChange={(e) => setKanbanGroupBy(e.target.value as KanbanGroupBy)}
-                  className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="day">Day</option>
-                  <option value="type">Activity Type</option>
-                  <option value="status">Status</option>
-                  <option value="location">Location</option>
-                </select>
-              </div>
-            )}
-
-            {/* Add Activity Button */}
-            {!readOnly && (
-              <button
-                onClick={() => handleActivityAddWrapper(days[0]?.id || 'day-1')}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                Add Activity
-              </button>
-            )}
-
-            {/* Settings */}
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
-              <Settings className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+          {/* View Mode Selector using Tabs */}
+          <Tabs value={viewMode} onValueChange={(value: string) => setViewMode(value as ViewMode)} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              {viewModeButtons.map(({ mode, icon: Icon, label }) => (
+                <TabsTrigger key={mode} value={mode} className="flex items-center gap-2">
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </CardHeader>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
+        <CardContent className="flex-1 overflow-hidden p-0">
           {viewMode === 'timeline' && (
             <TimelineView
               days={days}
@@ -265,7 +275,7 @@ export function ItineraryBuilder({
               />
             </div>
           )}
-        </div>
+        </CardContent>
 
         {/* Status Bar */}
         <div className="flex items-center justify-between px-4 py-2 bg-white border-t text-sm text-gray-600">
@@ -300,7 +310,7 @@ export function ItineraryBuilder({
             )}
           </div>
         </div>
-      </div>
+      </Card>
     </DragDropProvider>
   );
 }

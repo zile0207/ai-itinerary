@@ -1,27 +1,43 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Grid, List } from 'lucide-react';
 import Link from 'next/link';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { mockDataService, type Itinerary as MockItinerary } from '@/lib/mockDataService';
 import { NotificationCenter } from '@/components/notifications';
 import { 
-  DashboardContainer, 
-  DashboardSection, 
-  DashboardGrid,
-  EmptyState,
-  GridSkeleton
-} from '@/components/dashboard/DashboardGrid';
-import { ItineraryCard, ItineraryCardSkeleton } from '@/components/dashboard/ItineraryCard';
-import { SearchAndFilters } from '@/components/dashboard/SearchAndFilters';
-import { Pagination, usePagination } from '@/components/dashboard/Pagination';
-import { 
-  mockDataService,
-  type Itinerary,
-  type FilterOptions,
-  type SortOptions
-} from '@/lib/mockDataService';
+  Plus, 
+  Search, 
+  Filter, 
+  MoreHorizontal, 
+  Calendar, 
+  MapPin, 
+  Users, 
+  Copy,
+  Trash2,
+  Share2,
+  Eye,
+  Edit,
+  Download,
+  Star,
+  Clock
+} from 'lucide-react';
+
+// shadcn UI imports
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Use the Itinerary type from mockDataService as-is
+type Itinerary = MockItinerary;
 
 export default function DashboardPage() {
   return (
@@ -32,298 +48,388 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
-  const { user, logout } = useAuth();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<FilterOptions>({});
-  const [sort, setSort] = useState<SortOptions>({ field: 'updatedAt', direction: 'desc' });
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
-  
-  const { pagination, handlePageChange, handlePageSizeChange, reset } = usePagination(0, 12);
+  const [filteredItineraries, setFilteredItineraries] = useState<Itinerary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'date' | 'name' | 'modified'>('modified');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'active' | 'completed' | 'archived'>('all');
+  const [selectedItinerary, setSelectedItinerary] = useState<Itinerary | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  // Load data
-  const loadData = async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    loadItineraries();
+  }, []);
+
+  useEffect(() => {
+    filterAndSortItineraries();
+  }, [itineraries, searchTerm, sortBy, filterStatus]);
+
+  const loadItineraries = async () => {
     try {
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const result = await mockDataService.getItineraries(
-        filters,
-        sort,
-        {
-          page: pagination.currentPage,
-          limit: pagination.itemsPerPage
-        },
-        searchQuery
-      );
-      
+      setLoading(true);
+      const result = await mockDataService.getItineraries();
       setItineraries(result.itineraries);
-      setTotalItems(result.total);
-      
-      // Load available tags
-      const tags = await mockDataService.getAvailableTags();
-      setAvailableTags(tags);
-      
     } catch (error) {
       console.error('Failed to load itineraries:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Load data on mount and when dependencies change
-  useEffect(() => {
-    loadData();
-  }, [searchQuery, filters, sort, pagination.currentPage, pagination.itemsPerPage]);
+  const filterAndSortItineraries = () => {
+    let filtered = itineraries.filter(itinerary => {
+      const matchesSearch = itinerary.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           itinerary.destination.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = filterStatus === 'all' || itinerary.status === filterStatus;
+      return matchesSearch && matchesFilter;
+    });
 
-  // Reset pagination when search/filters change
-  useEffect(() => {
-    reset();
-  }, [searchQuery, filters, sort]);
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.title.localeCompare(b.title);
+        case 'date':
+          return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+                 case 'modified':
+         default:
+           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      }
+    });
 
-  // Action handlers
-  const handleToggleFavorite = async (id: string) => {
-    try {
-      await mockDataService.toggleFavorite(id);
-      loadData(); // Reload to get updated data
-    } catch (error) {
-      console.error('Failed to toggle favorite:', error);
-    }
+    setFilteredItineraries(filtered);
   };
 
-  const handleEdit = (id: string) => {
-    window.location.href = `/itinerary/${id}/edit`;
-  };
-
-  const handleDuplicate = async (id: string) => {
+  const handleDuplicate = async (itinerary: Itinerary) => {
     try {
-      await mockDataService.duplicateItinerary(id);
-      loadData(); // Reload to show the new duplicate
+      // Create duplicate with modified title
+      const duplicate = {
+        ...itinerary,
+        id: Date.now().toString(),
+        title: `${itinerary.title} (Copy)`,
+                 status: 'draft' as const,
+         updatedAt: new Date().toISOString(),
+         collaborators: []
+      };
+      
+      setItineraries(prev => [duplicate, ...prev]);
     } catch (error) {
       console.error('Failed to duplicate itinerary:', error);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this itinerary?')) {
-      try {
-        await mockDataService.deleteItinerary(id);
-        loadData(); // Reload to remove deleted item
-      } catch (error) {
-        console.error('Failed to delete itinerary:', error);
-      }
+  const handleDelete = async () => {
+    if (!selectedItinerary) return;
+    
+    try {
+      setItineraries(prev => prev.filter(item => item.id !== selectedItinerary.id));
+      setDeleteDialogOpen(false);
+      setSelectedItinerary(null);
+    } catch (error) {
+      console.error('Failed to delete itinerary:', error);
     }
   };
 
-  const handleShare = (id: string) => {
-    // Copy share URL to clipboard
-    const shareUrl = `${window.location.origin}/itinerary/${id}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert('Share link copied to clipboard!');
-    });
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'active': return 'default';
+      case 'completed': return 'secondary';
+      case 'draft': return 'outline';
+      case 'archived': return 'destructive';
+      default: return 'outline';
+    }
   };
 
-  const currentPagination = {
-    ...pagination,
-    totalItems,
-    totalPages: Math.ceil(totalItems / pagination.itemsPerPage),
-    hasNextPage: pagination.currentPage < Math.ceil(totalItems / pagination.itemsPerPage),
-    hasPreviousPage: pagination.currentPage > 1
+  const formatDuration = (days: number) => {
+    if (days === 1) return '1 day';
+    return `${days} days`;
+  };
+
+  const formatDateRange = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const formatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+    
+    if (startDate.getFullYear() !== endDate.getFullYear()) {
+      return `${formatter.format(startDate)}, ${startDate.getFullYear()} - ${formatter.format(endDate)}, ${endDate.getFullYear()}`;
+    }
+    return `${formatter.format(startDate)} - ${formatter.format(endDate)}, ${startDate.getFullYear()}`;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <DashboardContainer>
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center gap-8">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">My Itineraries</h1>
-                <p className="text-gray-600">Plan and manage your travel adventures</p>
+    <TooltipProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        {/* Header */}
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center space-x-4">
+                <h1 className="text-2xl font-bold text-gray-900">Your Itineraries</h1>
+                {!loading && (
+                  <Badge variant="secondary" className="text-sm">
+                    {filteredItineraries.length} of {itineraries.length}
+                  </Badge>
+                )}
               </div>
+              
+              <div className="flex items-center space-x-3">
+                <NotificationCenter />
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                      <Link href="/itinerary/new">
+                        <Plus className="h-4 w-4 mr-2" />
+                        New Itinerary
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Create a new travel itinerary</TooltipContent>
+                </Tooltip>
+                
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.profilePicture} alt={user?.firstName} />
+                  <AvatarFallback>{user?.firstName?.[0]}{user?.lastName?.[0]}</AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Search and Filter Bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search by destination or title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
             
-            <div className="flex items-center gap-4">
-              {/* Notifications */}
-              <NotificationCenter 
-                variant="icon"
-                showSettingsButton={true}
-                onNotificationClick={(id) => {
-                  // Handle notification click - could navigate to relevant page
-                  console.log('Notification clicked:', id);
-                }}
-              />
-              
-              {/* User Info */}
-              <div className="flex items-center gap-3">
-                {user?.profilePicture && (
-                  <img
-                    src={user.profilePicture}
-                    alt={`${user.firstName} ${user.lastName}`}
-                    className="h-8 w-8 rounded-full"
-                  />
-                )}
-                <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">
-                    {user?.firstName} {user?.lastName}
-                  </p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
-                </div>
-              </div>
-              
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/dashboard/notifications-test"
-                  className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
-                  title="Test notification system"
-                >
-                  🔔 Test
-                </Link>
-                
-                <Link
-                  href="/itinerary/new"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="h-4 w-4" />
-                  New Itinerary
-                </Link>
-                
-                <button
-                  onClick={logout}
-                  className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md hover:bg-gray-100"
-                >
-                  Sign out
-                </button>
-              </div>
-            </div>
-          </div>
-        </DashboardContainer>
-      </div>
-
-      {/* Main Content */}
-      <DashboardContainer>
-        <DashboardSection>
-          {/* Search and Filters */}
-          <div className="mb-8 space-y-4">
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-              <div className="flex-1 w-full lg:max-w-2xl">
-                <SearchAndFilters
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                  sort={sort}
-                  onSortChange={setSort}
-                  availableTags={availableTags}
-                  isLoading={isLoading}
-                />
-              </div>
-
-              {/* View Controls */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-blue-100 text-blue-600'
-                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                  }`}
-                  aria-label="Grid view"
-                >
-                  <Grid className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-blue-100 text-blue-600'
-                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                  }`}
-                  aria-label="List view"
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+            <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
+              <SelectTrigger className="w-[180px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="modified">Last Modified</SelectItem>
+                <SelectItem value="date">Travel Date</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Content */}
-          {isLoading ? (
-            <GridSkeleton count={pagination.itemsPerPage} />
-          ) : itineraries.length > 0 ? (
-            <>
-              {viewMode === 'grid' ? (
-                <DashboardGrid>
-                  {itineraries.map((itinerary) => (
-                    <ItineraryCard
-                      key={itinerary.id}
-                      itinerary={itinerary}
-                      onEdit={handleEdit}
-                      onDuplicate={handleDuplicate}
-                      onDelete={handleDelete}
-                      onShare={handleShare}
-                      onToggleFavorite={handleToggleFavorite}
-                    />
-                  ))}
-                </DashboardGrid>
-              ) : (
-                <div className="space-y-4">
-                  {itineraries.map((itinerary) => (
-                    <ItineraryCard
-                      key={itinerary.id}
-                      itinerary={itinerary}
-                      onEdit={handleEdit}
-                      onDuplicate={handleDuplicate}
-                      onDelete={handleDelete}
-                      onShare={handleShare}
-                      onToggleFavorite={handleToggleFavorite}
-                      className="max-w-none"
-                    />
-                  ))}
-                </div>
+          {/* Itineraries Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Card key={i} className="h-[320px]">
+                  <CardHeader className="pb-3">
+                    <Skeleton className="h-4 w-3/4 mb-2" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-32 w-full rounded-md mb-4" />
+                    <Skeleton className="h-3 w-full mb-2" />
+                    <Skeleton className="h-3 w-2/3" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredItineraries.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                <MapPin className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm || filterStatus !== 'all' ? 'No itineraries found' : 'No itineraries yet'}
+              </h3>
+              <p className="text-gray-500 mb-6">
+                {searchTerm || filterStatus !== 'all' 
+                  ? 'Try adjusting your search or filter criteria'
+                  : 'Create your first travel itinerary to get started'
+                }
+              </p>
+              {!searchTerm && filterStatus === 'all' && (
+                <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                  <Link href="/itinerary/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Itinerary
+                  </Link>
+                </Button>
               )}
-
-              {/* Pagination */}
-              <div className="mt-8">
-                <Pagination
-                  pagination={currentPagination}
-                  onPageChange={handlePageChange}
-                  onPageSizeChange={handlePageSizeChange}
-                  isLoading={isLoading}
-                />
-              </div>
-            </>
+            </div>
           ) : (
-            <EmptyState
-              title="No itineraries found"
-              description={
-                searchQuery || Object.keys(filters).length > 0
-                  ? "Try adjusting your search or filters to find what you're looking for."
-                  : "Get started by creating your first travel itinerary."
-              }
-              action={
-                <Link
-                  href="/itinerary/new"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="h-4 w-4" />
-                  {searchQuery || Object.keys(filters).length > 0 
-                    ? 'Create New Itinerary' 
-                    : 'Create Your First Itinerary'
-                  }
-                </Link>
-              }
-              icon={<Plus className="h-12 w-12" />}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredItineraries.map((itinerary) => (
+                <Card key={itinerary.id} className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg font-semibold text-gray-900 truncate">
+                          {itinerary.title}
+                        </CardTitle>
+                        <CardDescription className="flex items-center mt-1">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {itinerary.destination}
+                        </CardDescription>
+                      </div>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/itinerary/${itinerary.id}`} className="flex items-center">
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/itinerary/${itinerary.id}/edit`} className="flex items-center">
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicate(itinerary)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Share2 className="h-4 w-4 mr-2" />
+                            Share
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Download className="h-4 w-4 mr-2" />
+                            Export PDF
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => {
+                              setSelectedItinerary(itinerary);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="pb-4">
+                    {/* Thumbnail */}
+                    <div className="w-full h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-md mb-4 flex items-center justify-center overflow-hidden">
+                      {itinerary.thumbnail ? (
+                        <img src={itinerary.thumbnail} alt={itinerary.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <MapPin className="h-8 w-8 text-blue-500" />
+                      )}
+                    </div>
+                    
+                    {/* Trip Details */}
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-2" />
+                        <span>{formatDateRange(itinerary.startDate, itinerary.endDate)}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <Clock className="h-3 w-3 mr-2" />
+                          <span>{formatDuration(itinerary.duration)}</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <Users className="h-3 w-3 mr-1" />
+                          <span>{itinerary.travelers}</span>
+                        </div>
+                      </div>
+                      
+                      {itinerary.budget && (
+                        <div className="text-sm font-medium text-green-600">
+                          {new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: itinerary.budget.currency
+                          }).format(itinerary.budget.total)}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="pt-0">
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={getStatusBadgeVariant(itinerary.status)}>
+                          {itinerary.status}
+                        </Badge>
+                        
+                                                 {itinerary.isPublic && (
+                           <Tooltip>
+                             <TooltipTrigger>
+                               <Share2 className="h-3 w-3 text-blue-500" />
+                             </TooltipTrigger>
+                             <TooltipContent>Public itinerary</TooltipContent>
+                           </Tooltip>
+                         )}
+                       </div>
+                       
+                       {itinerary.collaborators && itinerary.collaborators.length > 0 && (
+                         <div className="flex items-center text-xs text-gray-500">
+                           <Users className="h-3 w-3 mr-1" />
+                           +{itinerary.collaborators.length} collaborator{itinerary.collaborators.length !== 1 ? 's' : ''}
+                         </div>
+                       )}
+                    </div>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
           )}
-        </DashboardSection>
-      </DashboardContainer>
-    </div>
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Itinerary</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{selectedItinerary?.title}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </TooltipProvider>
   );
 } 

@@ -28,163 +28,76 @@ function handleError(error, context = 'Unknown', additionalData = null) {
   return errorInfo;
 }
 
-/**
- * Initialize Socket.io server
- * @param {import('http').Server} httpServer - HTTP server instance
- * @returns {Server} Socket.io server instance
- */
-function initializeSocketServer(httpServer) {
-  try {
-    const io = new Server(httpServer, {
-      cors: {
-        origin: process.env.NODE_ENV === 'production' 
-          ? process.env.FRONTEND_URL 
-          : ["http://localhost:3000", "http://localhost:3001"],
-        methods: ["GET", "POST"],
-        credentials: true
-      },
-      transports: ['websocket', 'polling']
-    });
+let io;
 
-    // Connection handling
-    io.on('connection', (socket) => {
-      logger.info(`Client connected: ${socket.id}`);
-
-      // Handle join room for trip collaboration
-      socket.on('join-trip', (tripId) => {
-        socket.join(`trip-${tripId}`);
-        logger.info(`Socket ${socket.id} joined trip room: ${tripId}`);
-      });
-
-      // Handle leave room
-      socket.on('leave-trip', (tripId) => {
-        socket.leave(`trip-${tripId}`);
-        logger.info(`Socket ${socket.id} left trip room: ${tripId}`);
-      });
-
-      // Handle itinerary updates
-      socket.on('itinerary-update', (data) => {
-        const { tripId, update } = data;
-        socket.to(`trip-${tripId}`).emit('itinerary-updated', update);
-        logger.info(`Itinerary update broadcast for trip: ${tripId}`);
-      });
-
-      // Handle operational transformation events
-      socket.on('ot-operation', (data) => {
-        try {
-          const { tripId, operation } = data;
-          
-          // Validate trip membership
-          if (!socket.rooms.has(`trip-${tripId}`)) {
-            socket.emit('error', { message: 'Not joined to trip', code: 'NOT_IN_TRIP' });
-            return;
-          }
-
-          // Add server timestamp and broadcast to other users
-          const serverOperation = {
-            ...operation,
-            serverTimestamp: Date.now()
-          };
-
-          socket.to(`trip-${tripId}`).emit('ot-operation', {
-            operation: serverOperation,
-            tripId
-          });
-
-          // Acknowledge the operation
-          socket.emit('ot-acknowledged', { operationId: operation.id });
-
-          logger.info(`OT operation applied in trip ${tripId}`, { 
-            operationType: operation.type, 
-            userId: operation.userId,
-            operationId: operation.id 
-          });
-        } catch (error) {
-          handleError(error, `OT operation error for socket ${socket.id}`, data);
-          socket.emit('ot-rejected', { 
-            operationId: data.operation?.id, 
-            reason: error.message 
-          });
-        }
-      });
-
-      // Handle undo/redo operations
-      socket.on('ot-undo', (data) => {
-        try {
-          const { tripId, operationId } = data;
-          
-          if (!socket.rooms.has(`trip-${tripId}`)) {
-            socket.emit('error', { message: 'Not joined to trip', code: 'NOT_IN_TRIP' });
-            return;
-          }
-
-          socket.to(`trip-${tripId}`).emit('ot-undo', {
-            operationId,
-            timestamp: Date.now(),
-            tripId
-          });
-
-          logger.info(`Undo operation in trip ${tripId}`, { operationId });
-        } catch (error) {
-          handleError(error, `OT undo error for socket ${socket.id}`, data);
-        }
-      });
-
-      socket.on('ot-redo', (data) => {
-        try {
-          const { tripId, operationId } = data;
-          
-          if (!socket.rooms.has(`trip-${tripId}`)) {
-            socket.emit('error', { message: 'Not joined to trip', code: 'NOT_IN_TRIP' });
-            return;
-          }
-
-          socket.to(`trip-${tripId}`).emit('ot-redo', {
-            operationId,
-            timestamp: Date.now(),
-            tripId
-          });
-
-          logger.info(`Redo operation in trip ${tripId}`, { operationId });
-        } catch (error) {
-          handleError(error, `OT redo error for socket ${socket.id}`, data);
-        }
-      });
-
-      // Handle collaborative editing
-      socket.on('edit-start', (data) => {
-        const { tripId, itemId, userId } = data;
-        socket.to(`trip-${tripId}`).emit('edit-locked', { itemId, userId });
-      });
-
-      socket.on('edit-end', (data) => {
-        const { tripId, itemId } = data;
-        socket.to(`trip-${tripId}`).emit('edit-unlocked', { itemId });
-      });
-
-      // Handle real-time comments
-      socket.on('comment-added', (data) => {
-        const { tripId, comment } = data;
-        socket.to(`trip-${tripId}`).emit('new-comment', comment);
-      });
-
-      // Handle disconnection
-      socket.on('disconnect', () => {
-        logger.info(`Client disconnected: ${socket.id}`);
-      });
-
-      // Error handling
-      socket.on('error', (error) => {
-        handleError(error, `Socket error for ${socket.id}`);
-      });
-    });
-
-    logger.info('Socket.io server initialized successfully');
+function initializeSocketIO(server) {
+  if (io) {
     return io;
+  }
 
-  } catch (error) {
-    handleError(error, 'Failed to initialize Socket.io server');
-    throw error;
+  io = new Server(server, {
+    cors: {
+      origin: process.env.NODE_ENV === 'production' 
+        ? process.env.NEXTAUTH_URL 
+        : ["http://localhost:3000", "http://127.0.0.1:3000"],
+      credentials: true
+    },
+    transports: ['websocket', 'polling']
+  });
+
+  io.on('connection', (socket) => {
+    console.log(`[${new Date().toISOString()}] [INFO] Client connected: ${socket.id}`);
+
+    // Handle real-time notifications
+    socket.on('join-user-room', (userId) => {
+      socket.join(`user-${userId}`);
+      console.log(`[${new Date().toISOString()}] [INFO] User ${userId} joined their room`);
+    });
+
+    // Handle itinerary collaboration
+    socket.on('join-itinerary-room', (itineraryId) => {
+      socket.join(`itinerary-${itineraryId}`);
+      console.log(`[${new Date().toISOString()}] [INFO] Client joined itinerary room: ${itineraryId}`);
+    });
+
+    // Handle itinerary updates
+    socket.on('itinerary-update', (data) => {
+      socket.to(`itinerary-${data.itineraryId}`).emit('itinerary-updated', data);
+    });
+
+    // Handle optimization updates
+    socket.on('optimization-progress', (data) => {
+      socket.to(`itinerary-${data.itineraryId}`).emit('optimization-progress-update', data);
+    });
+
+    socket.on('disconnect', () => {
+      console.log(`[${new Date().toISOString()}] [INFO] Client disconnected: ${socket.id}`);
+    });
+
+    socket.on('error', (error) => {
+      console.error(`[Socket.io] Connection error:`, error);
+    });
+  });
+
+  return io;
+}
+
+function getSocketIO() {
+  if (!io) {
+    throw new Error('Socket.IO not initialized. Call initializeSocketIO first.');
+  }
+  return io;
+}
+
+function emitToUser(userId, event, data) {
+  if (io) {
+    io.to(`user-${userId}`).emit(event, data);
+  }
+}
+
+function emitToItinerary(itineraryId, event, data) {
+  if (io) {
+    io.to(`itinerary-${itineraryId}`).emit(event, data);
   }
 }
 
@@ -221,7 +134,10 @@ async function getTripClientCount(io, tripId) {
 }
 
 module.exports = {
-  initializeSocketServer,
+  initializeSocketIO,
+  getSocketIO,
+  emitToUser,
+  emitToItinerary,
   emitToTrip,
   getTripClientCount
 }; 

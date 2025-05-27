@@ -33,7 +33,7 @@ export default function Home() {
             From destinations to activities, we&apos;ll help you plan every detail of your journey.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/prompt-generator">
+            <Link href="/itinerary/new">
               <Button size="lg" className="text-lg px-8 py-3">
                 Start Planning
               </Button>
@@ -106,7 +106,7 @@ export default function Home() {
             Join thousands of travelers who have discovered their perfect trips with our AI-powered planning tool.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/prompt-generator">
+            <Link href="/itinerary/new">
               <Button size="lg" className="text-lg px-8 py-3">
                 Create Your Itinerary
               </Button>
