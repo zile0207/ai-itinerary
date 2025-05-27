@@ -1,60 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest } from '@/lib/auth';
-import { mockItineraries, findItinerariesByUser, searchItineraries, Itinerary } from '@/lib/mock-data/itineraries';
+import { mockDataService } from '@/lib/mockDataService';
+import type { Itinerary } from '@/lib/mockDataService';
 
 // GET /api/itineraries - List itineraries with optional search and filtering
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await authenticateRequest(request);
+    const searchParams = request.nextUrl.searchParams;
+    const search = searchParams.get('search') || undefined;
     
-    if ('error' in authResult) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
-    }
+    const result = await mockDataService.getItineraries(undefined, undefined, undefined, search);
     
-    const { user } = authResult;
-    const { searchParams } = new URL(request.url);
-    
-    const search = searchParams.get('search');
-    const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const offset = parseInt(searchParams.get('offset') || '0');
-    
-    let itineraries: Itinerary[];
-    
-    // Get user's itineraries
-    itineraries = findItinerariesByUser(user.id);
-    
-    // Apply search filter
-    if (search) {
-      itineraries = searchItineraries(search).filter(it => it.createdBy === user.id);
-    }
-    
-    // Apply status filter
-    if (status) {
-      itineraries = itineraries.filter(it => it.status === status);
-    }
-    
-    // Apply pagination
-    const total = itineraries.length;
-    const paginatedItineraries = itineraries.slice(offset, offset + limit);
-    
-    return NextResponse.json({
-      itineraries: paginatedItineraries,
-      pagination: {
-        total,
-        limit,
-        offset,
-        hasMore: offset + limit < total
-      }
+    return NextResponse.json({ 
+      itineraries: result.itineraries,
+      total: result.total 
     });
-    
   } catch (error) {
-    console.error('Get itineraries error:', error);
+    console.error('Error fetching itineraries:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch itineraries' },
       { status: 500 }
     );
   }
@@ -63,59 +26,53 @@ export async function GET(request: NextRequest) {
 // POST /api/itineraries - Create new itinerary
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await authenticateRequest(request);
-    
-    if ('error' in authResult) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
-    }
-    
-    const { user } = authResult;
     const body = await request.json();
     
-    const { title, description, destination, startDate, endDate, travelers, budget, tags } = body;
-    
     // Validate required fields
-    if (!title || !destination || !startDate || !endDate) {
+    if (!body.title || !body.destination || !body.startDate || !body.endDate) {
       return NextResponse.json(
-        { error: 'Title, destination, start date, and end date are required' },
+        { error: 'Missing required fields: title, destination, startDate, endDate' },
         { status: 400 }
       );
     }
+
+    // For now, use a mock user ID - in a real app, get this from authentication
+    const userId = 'test-user-123';
     
-    // Create new itinerary
-    const newItinerary: Itinerary = {
-      id: (mockItineraries.length + 1).toString(),
-      title,
-      description: description || '',
-      destination,
-      startDate,
-      endDate,
-      travelers: travelers || { adults: 1, children: 0 },
-      budget: budget || { total: 0, currency: 'USD', spent: 0 },
-      days: [],
-      createdBy: user.id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    // Calculate duration
+    const startDate = new Date(body.startDate);
+    const endDate = new Date(body.endDate);
+    const duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    const createRequest: Omit<Itinerary, 'id' | 'createdAt' | 'updatedAt'> = {
+      title: body.title,
+      description: body.description || '',
+      destination: body.destination,
+      startDate: body.startDate,
+      endDate: body.endDate,
+      duration: duration,
       status: 'draft',
+      thumbnail: '',
+      tags: body.tags || [],
+      budget: body.budget || { total: 0, currency: 'USD' },
+      travelers: body.travelers?.adults || body.travelers || 1,
       isPublic: false,
-      tags: tags || []
+      isFavorite: false,
+      createdBy: userId,
+      collaborators: [],
+      activities: []
     };
+
+    const itinerary = await mockDataService.createItinerary(createRequest);
     
-    // Add to mock data (in real app, would save to database)
-    mockItineraries.push(newItinerary);
-    
-    return NextResponse.json({
-      itinerary: newItinerary,
-      message: 'Itinerary created successfully'
+    return NextResponse.json({ 
+      itinerary,
+      message: 'Itinerary created successfully' 
     }, { status: 201 });
-    
   } catch (error) {
-    console.error('Create itinerary error:', error);
+    console.error('Error creating itinerary:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to create itinerary' },
       { status: 500 }
     );
   }

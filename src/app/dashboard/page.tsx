@@ -1,8 +1,27 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { Plus, Grid, List } from 'lucide-react';
+import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
-import Link from 'next/link';
+import { NotificationCenter } from '@/components/notifications';
+import { 
+  DashboardContainer, 
+  DashboardSection, 
+  DashboardGrid,
+  EmptyState,
+  GridSkeleton
+} from '@/components/dashboard/DashboardGrid';
+import { ItineraryCard, ItineraryCardSkeleton } from '@/components/dashboard/ItineraryCard';
+import { SearchAndFilters } from '@/components/dashboard/SearchAndFilters';
+import { Pagination, usePagination } from '@/components/dashboard/Pagination';
+import { 
+  mockDataService,
+  type Itinerary,
+  type FilterOptions,
+  type SortOptions
+} from '@/lib/mockDataService';
 
 export default function DashboardPage() {
   return (
@@ -14,17 +33,134 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { user, logout } = useAuth();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<FilterOptions>({});
+  const [sort, setSort] = useState<SortOptions>({ field: 'updatedAt', direction: 'desc' });
+  const [isLoading, setIsLoading] = useState(true);
+  const [itineraries, setItineraries] = useState<Itinerary[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  
+  const { pagination, handlePageChange, handlePageSizeChange, reset } = usePagination(0, 12);
+
+  // Load data
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const result = await mockDataService.getItineraries(
+        filters,
+        sort,
+        {
+          page: pagination.currentPage,
+          limit: pagination.itemsPerPage
+        },
+        searchQuery
+      );
+      
+      setItineraries(result.itineraries);
+      setTotalItems(result.total);
+      
+      // Load available tags
+      const tags = await mockDataService.getAvailableTags();
+      setAvailableTags(tags);
+      
+    } catch (error) {
+      console.error('Failed to load itineraries:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load data on mount and when dependencies change
+  useEffect(() => {
+    loadData();
+  }, [searchQuery, filters, sort, pagination.currentPage, pagination.itemsPerPage]);
+
+  // Reset pagination when search/filters change
+  useEffect(() => {
+    reset();
+  }, [searchQuery, filters, sort]);
+
+  // Action handlers
+  const handleToggleFavorite = async (id: string) => {
+    try {
+      await mockDataService.toggleFavorite(id);
+      loadData(); // Reload to get updated data
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    window.location.href = `/itinerary/${id}/edit`;
+  };
+
+  const handleDuplicate = async (id: string) => {
+    try {
+      await mockDataService.duplicateItinerary(id);
+      loadData(); // Reload to show the new duplicate
+    } catch (error) {
+      console.error('Failed to duplicate itinerary:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this itinerary?')) {
+      try {
+        await mockDataService.deleteItinerary(id);
+        loadData(); // Reload to remove deleted item
+      } catch (error) {
+        console.error('Failed to delete itinerary:', error);
+      }
+    }
+  };
+
+  const handleShare = (id: string) => {
+    // Copy share URL to clipboard
+    const shareUrl = `${window.location.origin}/itinerary/${id}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      alert('Share link copied to clipboard!');
+    });
+  };
+
+  const currentPagination = {
+    ...pagination,
+    totalItems,
+    totalPages: Math.ceil(totalItems / pagination.itemsPerPage),
+    hasNextPage: pagination.currentPage < Math.ceil(totalItems / pagination.itemsPerPage),
+    hasPreviousPage: pagination.currentPage > 1
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">My Itinerary App</h1>
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <DashboardContainer>
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center gap-8">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">My Itineraries</h1>
+                <p className="text-gray-600">Plan and manage your travel adventures</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+            
+            <div className="flex items-center gap-4">
+              {/* Notifications */}
+              <NotificationCenter 
+                variant="icon"
+                showSettingsButton={true}
+                onNotificationClick={(id) => {
+                  // Handle notification click - could navigate to relevant page
+                  console.log('Notification clicked:', id);
+                }}
+              />
+              
+              {/* User Info */}
+              <div className="flex items-center gap-3">
                 {user?.profilePicture && (
                   <img
                     src={user.profilePicture}
@@ -32,71 +168,162 @@ function DashboardContent() {
                     className="h-8 w-8 rounded-full"
                   />
                 )}
-                <span className="text-sm text-gray-700">
-                  {user?.firstName} {user?.lastName}
-                </span>
+                <div className="hidden sm:block">
+                  <p className="text-sm font-medium text-gray-900">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
               </div>
-              <button
-                onClick={logout}
-                className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md hover:bg-gray-100"
-              >
-                Sign out
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Welcome to your Dashboard, {user?.firstName}!
-              </h2>
-              <p className="text-gray-600 mb-8">
-                Your authentication is working perfectly. This is a protected page that requires login.
-              </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">My Itineraries</h3>
-                  <p className="text-gray-600 text-sm">View and manage your travel plans</p>
-                  <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                    View Itineraries
-                  </button>
-                </div>
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/dashboard/notifications-test"
+                  className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+                  title="Test notification system"
+                >
+                  🔔 Test
+                </Link>
                 
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Trip</h3>
-                  <p className="text-gray-600 text-sm">Plan your next adventure</p>
-                  <Link href="/prompt-generator" className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 block text-center">
-                    Create Trip
-                  </Link>
-                </div>
+                <Link
+                  href="/itinerary/new"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  New Itinerary
+                </Link>
                 
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Profile Settings</h3>
-                  <p className="text-gray-600 text-sm">Update your preferences</p>
-                  <Link href="/profile" className="mt-4 w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 block text-center">
-                    Edit Profile
-                  </Link>
-                </div>
-              </div>
-
-              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-                <h4 className="text-sm font-medium text-blue-900 mb-2">User Information</h4>
-                <div className="text-xs text-blue-700 space-y-1">
-                  <p><strong>Email:</strong> {user?.email}</p>
-                  <p><strong>Member since:</strong> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</p>
-                  <p><strong>Last login:</strong> {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'N/A'}</p>
-                  <p><strong>Email verified:</strong> {user?.isEmailVerified ? 'Yes' : 'No'}</p>
-                </div>
+                <button
+                  onClick={logout}
+                  className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md hover:bg-gray-100"
+                >
+                  Sign out
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      </main>
+        </DashboardContainer>
+      </div>
+
+      {/* Main Content */}
+      <DashboardContainer>
+        <DashboardSection>
+          {/* Search and Filters */}
+          <div className="mb-8 space-y-4">
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+              <div className="flex-1 w-full lg:max-w-2xl">
+                <SearchAndFilters
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  sort={sort}
+                  onSortChange={setSort}
+                  availableTags={availableTags}
+                  isLoading={isLoading}
+                />
+              </div>
+
+              {/* View Controls */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-blue-100 text-blue-600'
+                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-blue-100 text-blue-600'
+                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          {isLoading ? (
+            <GridSkeleton count={pagination.itemsPerPage} />
+          ) : itineraries.length > 0 ? (
+            <>
+              {viewMode === 'grid' ? (
+                <DashboardGrid>
+                  {itineraries.map((itinerary) => (
+                    <ItineraryCard
+                      key={itinerary.id}
+                      itinerary={itinerary}
+                      onEdit={handleEdit}
+                      onDuplicate={handleDuplicate}
+                      onDelete={handleDelete}
+                      onShare={handleShare}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
+                  ))}
+                </DashboardGrid>
+              ) : (
+                <div className="space-y-4">
+                  {itineraries.map((itinerary) => (
+                    <ItineraryCard
+                      key={itinerary.id}
+                      itinerary={itinerary}
+                      onEdit={handleEdit}
+                      onDuplicate={handleDuplicate}
+                      onDelete={handleDelete}
+                      onShare={handleShare}
+                      onToggleFavorite={handleToggleFavorite}
+                      className="max-w-none"
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Pagination */}
+              <div className="mt-8">
+                <Pagination
+                  pagination={currentPagination}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  isLoading={isLoading}
+                />
+              </div>
+            </>
+          ) : (
+            <EmptyState
+              title="No itineraries found"
+              description={
+                searchQuery || Object.keys(filters).length > 0
+                  ? "Try adjusting your search or filters to find what you're looking for."
+                  : "Get started by creating your first travel itinerary."
+              }
+              action={
+                <Link
+                  href="/itinerary/new"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  {searchQuery || Object.keys(filters).length > 0 
+                    ? 'Create New Itinerary' 
+                    : 'Create Your First Itinerary'
+                  }
+                </Link>
+              }
+              icon={<Plus className="h-12 w-12" />}
+            />
+          )}
+        </DashboardSection>
+      </DashboardContainer>
     </div>
   );
 } 

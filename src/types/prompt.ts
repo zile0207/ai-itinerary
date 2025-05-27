@@ -47,10 +47,29 @@ export interface BudgetData {
   priorities: string[];
 }
 
-export interface ExternalContentData {
-  urls: string[];
-  contentType: 'blog' | 'video' | 'social' | 'itinerary';
+export interface ExternalContentItem {
+  id: string;
+  type: 'url' | 'text' | 'file';
+  content: string;
+  contentType: 'blog' | 'video' | 'social' | 'itinerary' | 'article' | 'review' | 'other';
+  title?: string;
   extractedInsights?: string[];
+  status: 'pending' | 'analyzing' | 'completed' | 'error';
+  error?: string;
+}
+
+export interface ExternalContentData {
+  items: ExternalContentItem[];
+  analysisEnabled: boolean;
+  privacyConsent: boolean;
+  extractedPreferences?: {
+    destinations?: string[];
+    activities?: string[];
+    accommodations?: string[];
+    dining?: string[];
+    budget?: string;
+    travelStyle?: string[];
+  };
 }
 
 export interface PromptFormData {

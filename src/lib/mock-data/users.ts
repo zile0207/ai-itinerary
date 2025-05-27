@@ -29,6 +29,9 @@ export interface NotificationSettings {
 // Pre-hashed passwords for demo users (password: "password123")
 const hashedPassword = bcrypt.hashSync('password123', 10);
 
+// Pre-hashed password for test account (password: "Test1234")
+const testPassword = bcrypt.hashSync('Test1234', 10);
+
 export const mockUsers: User[] = [
   {
     id: '1',
@@ -90,6 +93,27 @@ export const mockUsers: User[] = [
         sms: false
       },
       travelInterests: ['budget', 'backpacking', 'adventure', 'local-experiences']
+    },
+    isEmailVerified: true
+  },
+  {
+    id: '4',
+    email: 'test@gmail.com',
+    passwordHash: testPassword,
+    firstName: 'Test',
+    lastName: 'User',
+    createdAt: '2025-05-27T08:00:00Z',
+    updatedAt: '2025-05-27T08:00:00Z',
+    lastLogin: '2025-05-27T08:00:00Z',
+    profilePicture: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    preferences: {
+      currency: 'USD',
+      notificationSettings: {
+        email: true,
+        push: true,
+        sms: false
+      },
+      travelInterests: ['technology', 'urban-exploration', 'photography', 'food']
     },
     isEmailVerified: true
   }

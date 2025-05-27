@@ -54,8 +54,9 @@ const getInitialFormData = (initialData?: Partial<PromptFormData>): PromptFormDa
     ...initialData?.budget
   },
   externalContent: {
-    urls: [],
-    contentType: 'blog',
+    items: [],
+    analysisEnabled: false,
+    privacyConsent: false,
     ...initialData?.externalContent
   }
 });
@@ -84,16 +85,21 @@ export const PromptGenerator: React.FC<PromptGeneratorProps> = ({
   const progressPercentage = ((currentStepIndex + 1) / FORM_STEPS.length) * 100;
 
   const updateFormData = useCallback((section: keyof PromptFormData, data: Partial<PromptFormData[keyof PromptFormData]>) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: { ...prev[section], ...data }
-    }));
-    
-    // Auto-save if enabled
-    if (onSave) {
-      onSave({ [section]: { ...formData[section], ...data } });
-    }
-  }, [formData, onSave]);
+    setFormData(prev => {
+      const newSectionData = { ...prev[section], ...data };
+      const newFormData = {
+        ...prev,
+        [section]: newSectionData
+      };
+      
+      // Auto-save if enabled
+      if (onSave) {
+        onSave({ [section]: newSectionData });
+      }
+      
+      return newFormData;
+    });
+  }, [onSave]);
 
   const updateStepValidation = useCallback((step: FormStep, validation: StepValidation) => {
     setStepValidations(prev => ({

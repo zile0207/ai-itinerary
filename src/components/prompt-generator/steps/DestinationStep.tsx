@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,11 +48,7 @@ export const DestinationStep: React.FC<StepContentProps> = ({
     'Turkey'
   ];
 
-  useEffect(() => {
-    validateStep();
-  }, [destination, selectedMapLocation]);
-
-  const validateStep = () => {
+  const validateStep = useCallback(() => {
     const hasDestination = destination.trim().length >= 2;
     const hasMapSelection = selectedMapLocation !== undefined;
     const isValid = hasDestination || hasMapSelection;
@@ -65,7 +61,11 @@ export const DestinationStep: React.FC<StepContentProps> = ({
     }
 
     updateValidation('destination', { isValid, errors });
-  };
+  }, [destination, selectedMapLocation, updateValidation]);
+
+  useEffect(() => {
+    validateStep();
+  }, [validateStep]);
 
   const handleDestinationChange = (value: string) => {
     setDestination(value);
@@ -134,7 +134,7 @@ export const DestinationStep: React.FC<StepContentProps> = ({
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-semibold text-gray-900">Where would you like to go?</h2>
         <p className="text-gray-600">
-          Enter your dream destination. You can be specific like "Paris, France" or general like "European cities"
+          Enter your dream destination. You can be specific like &quot;Paris, France&quot; or general like &quot;European cities&quot;
         </p>
       </div>
 
@@ -202,10 +202,10 @@ export const DestinationStep: React.FC<StepContentProps> = ({
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-medium text-blue-900 mb-2">💡 Tips for better results:</h4>
             <ul className="text-blue-800 text-sm space-y-1">
-              <li>• Be specific: "Kyoto, Japan" vs "Japan"</li>
-              <li>• Multiple destinations: "Paris and London" works too</li>
-              <li>• Regions: "Greek Islands" or "Northern Italy"</li>
-              <li>• Themes: "Safari destinations in Africa"</li>
+              <li>• Be specific: &quot;Kyoto, Japan&quot; vs &quot;Japan&quot;</li>
+              <li>• Multiple destinations: &quot;Paris and London&quot; works too</li>
+              <li>• Regions: &quot;Greek Islands&quot; or &quot;Northern Italy&quot;</li>
+              <li>• Themes: &quot;Safari destinations in Africa&quot;</li>
             </ul>
           </div>
         </CardContent>
