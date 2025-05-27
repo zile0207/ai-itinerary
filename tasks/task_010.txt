@@ -1,0 +1,212 @@
+# Task ID: 10
+# Title: Implement Sharing and Export Functionality
+# Status: pending
+# Dependencies: 6, 8
+# Priority: low
+# Description: Develop the sharing and export features including PDF generation, shareable links with permission controls, and social media integration.
+# Details:
+1. Create PDF export functionality with professional formatting
+2. Implement shareable link generation with custom permissions
+3. Build social media sharing with preview images
+4. Create mobile-friendly export versions
+5. Implement offline access capabilities
+6. Build email sharing functionality
+7. Create print-optimized formatting
+8. Implement access tracking for shared itineraries
+9. Build expiration settings for shared links
+10. Create viewer-only mode for shared itineraries
+
+Example PDF generation:
+```typescript
+const generateItineraryPDF = async (itinerary: Itinerary): Promise<Buffer> => {
+  // Create a new PDF document
+  const doc = new PDFDocument();
+  const buffers: Buffer[] = [];
+  
+  // Collect PDF data chunks
+  doc.on('data', buffers.push.bind(buffers));
+  
+  // Add header with title and dates
+  doc.fontSize(24).text(itinerary.title, { align: 'center' });
+  doc.fontSize(14).text(
+    `${formatDate(itinerary.startDate)} - ${formatDate(itinerary.endDate)}`,
+    { align: 'center' }
+  );
+  
+  // Add destination image if available
+  if (itinerary.coverImage) {
+    try {
+      const imageResponse = await fetch(itinerary.coverImage);
+      const imageBuffer = await imageResponse.arrayBuffer();
+      doc.image(Buffer.from(imageBuffer), {
+        fit: [500, 300],
+        align: 'center'
+      });
+    } catch (error) {
+      console.error('Failed to add cover image:', error);
+    }
+  }
+  
+  // Add overview map
+  try {
+    const mapUrl = generateStaticMapUrl(itinerary);
+    const mapResponse = await fetch(mapUrl);
+    const mapBuffer = await mapResponse.arrayBuffer();
+    doc.addPage();
+    doc.image(Buffer.from(mapBuffer), {
+      fit: [500, 400],
+      align: 'center'
+    });
+    doc.fontSize(12).text('Trip Overview Map', { align: 'center' });
+  } catch (error) {
+    console.error('Failed to add map:', error);
+  }
+  
+  // Add day-by-day itinerary
+  itinerary.days.forEach((day, index) => {
+    doc.addPage();
+    doc.fontSize(18).text(`Day ${index + 1}: ${formatDate(day.date)}`, { underline: true });
+    
+    // Add activities
+    day.activities.forEach((activity, actIndex) => {
+      doc.moveDown();
+      doc.fontSize(14).text(`${activity.startTime} - ${activity.endTime}: ${activity.title}`);
+      doc.fontSize(12).text(activity.description, { indent: 20 });
+      
+      // Add activity details
+      if (activity.location) {
+        doc.fontSize(10).text(`Location: ${activity.location}`, { indent: 20 });
+      }
+      if (activity.cost) {
+        doc.fontSize(10).text(`Cost: ${formatCurrency(activity.cost, itinerary.currency)}`, { indent: 20 });
+      }
+      
+      // Add activity notes if available
+      if (activity.notes) {
+        doc.fontSize(10).text(`Notes: ${activity.notes}`, { indent: 20, italic: true });
+      }
+    });
+  });
+  
+  // Add budget summary if available
+  if (itinerary.budget) {
+    doc.addPage();
+    doc.fontSize(18).text('Budget Summary', { underline: true });
+    
+    // Add budget breakdown by category
+    const categories = calculateBudgetByCategory(itinerary);
+    Object.entries(categories).forEach(([category, amount]) => {
+      doc.fontSize(12).text(`${category}: ${formatCurrency(amount, itinerary.currency)}`);
+    });
+    
+    // Add total budget
+    doc.moveDown();
+    doc.fontSize(14).text(
+      `Total Budget: ${formatCurrency(itinerary.budget.amount, itinerary.currency)}`,
+      { bold: true }
+    );
+  }
+  
+  // Add traveler information if available
+  if (itinerary.travelers && itinerary.travelers.length > 0) {
+    doc.addPage();
+    doc.fontSize(18).text('Traveler Information', { underline: true });
+    
+    itinerary.travelers.forEach(traveler => {
+      doc.moveDown();
+      doc.fontSize(14).text(traveler.name);
+      if (traveler.contact) {
+        doc.fontSize(10).text(`Contact: ${traveler.contact}`, { indent: 20 });
+      }
+      if (traveler.notes) {
+        doc.fontSize(10).text(`Notes: ${traveler.notes}`, { indent: 20 });
+      }
+    });
+  }
+  
+  // Finalize the PDF
+  doc.end();
+  
+  // Return a promise that resolves with the PDF buffer
+  return new Promise((resolve, reject) => {
+    doc.on('end', () => {
+      resolve(Buffer.concat(buffers));
+    });
+    doc.on('error', reject);
+  });
+};
+
+const handleExportPDF = async (itineraryId: string) => {
+  try {
+    setIsExporting(true);
+    
+    // Fetch complete itinerary data
+    const itinerary = await fetchItineraryDetails(itineraryId);
+    
+    // Generate PDF
+    const pdfBuffer = await generateItineraryPDF(itinerary);
+    
+    // Create download link
+    const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create and click download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${itinerary.title.replace(/\s+/g, '_')}_itinerary.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to export PDF:', error);
+    setExportError('Failed to generate PDF. Please try again.');
+  } finally {
+    setIsExporting(false);
+  }
+};
+```
+
+# Test Strategy:
+1. Unit tests for PDF generation
+2. Test shareable link generation and permissions
+3. Verify social media preview rendering
+4. Test mobile-friendly export versions
+5. Validate offline access functionality
+6. Test email sharing capabilities
+7. Verify print formatting
+8. Test access tracking for shared itineraries
+
+# Subtasks:
+## 1. Implement PDF Generation with Formatting [pending]
+### Dependencies: None
+### Description: Create a robust PDF export functionality that maintains consistent formatting of content
+### Details:
+Develop a PDF generation service that preserves text formatting, images, tables, and other content elements. Include options for customizing headers/footers, page numbers, and document metadata. Implement template system for different PDF styles. Security considerations: Ensure no sensitive metadata is embedded in PDFs. Testing requirements: Verify rendering across different content types, test large documents for performance issues, validate PDF compliance with accessibility standards.
+
+## 2. Build Shareable Link System with Permissions [pending]
+### Dependencies: 10.1
+### Description: Develop a secure system for generating and managing shareable links with granular permission controls
+### Details:
+Create functionality to generate unique, secure URLs for content sharing. Implement permission levels (view-only, comment, edit). Add expiration settings for links and password protection options. Security considerations: Implement proper authentication checks, prevent brute force attacks, use secure random token generation. Testing requirements: Test permission enforcement, verify link expiration works correctly, validate security against unauthorized access attempts.
+
+## 3. Integrate Social Media Sharing [pending]
+### Dependencies: 10.2
+### Description: Enable direct sharing to major social media platforms with customizable content previews
+### Details:
+Implement sharing APIs for major platforms (Twitter, Facebook, LinkedIn, etc.). Create customizable preview cards with images and descriptions. Add UTM parameter support for tracking. Security considerations: Implement proper OAuth flows, review data shared with platforms for privacy compliance. Testing requirements: Verify correct rendering of preview cards on each platform, test sharing flow on mobile and desktop, validate tracking parameters.
+
+## 4. Develop Email Sharing Functionality [pending]
+### Dependencies: 10.2
+### Description: Create an email sharing system with customizable templates and recipient management
+### Details:
+Build email composition interface with recipient management. Implement customizable email templates with proper content rendering. Add scheduling options for delayed sending. Security considerations: Implement rate limiting to prevent spam, validate email addresses, sanitize content. Testing requirements: Test email delivery and rendering across major email clients, verify template customization works correctly, validate handling of bounced emails.
+
+## 5. Implement Access Tracking and Analytics [pending]
+### Dependencies: 10.2, 10.3, 10.4
+### Description: Create a comprehensive system to track and analyze how shared content is accessed and used
+### Details:
+Develop tracking for link access events (views, downloads, shares). Create analytics dashboard showing usage patterns and engagement metrics. Implement notification system for important events (first access, unusual activity). Security considerations: Anonymize data appropriately, implement secure storage of tracking data, ensure GDPR compliance. Testing requirements: Verify accurate tracking across different access methods, test dashboard with large datasets, validate notification system reliability.
+

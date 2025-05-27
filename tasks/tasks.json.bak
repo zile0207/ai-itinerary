@@ -1,0 +1,675 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Setup Project Repository and Architecture",
+      "description": "Initialize the project repository with React.js, TypeScript, Tailwind CSS, and shadcn. Set up the Node.js/Express.js backend and configure PostgreSQL and Redis databases.",
+      "details": "1. Create a new Git repository\n2. Initialize frontend with Create React App or Next.js with TypeScript\n3. Install and configure Tailwind CSS and shadcn UI components\n4. Set up Node.js/Express.js backend with TypeScript\n5. Configure PostgreSQL database with appropriate schemas for users, itineraries, activities, etc.\n6. Set up Redis for caching and session management\n7. Implement basic project structure with directories for components, services, hooks, etc.\n8. Configure ESLint and Prettier for code quality\n9. Set up CI/CD pipeline with GitHub Actions\n10. Create development, staging, and production environments\n\nCode structure example:\n```typescript\n// Project structure\n/frontend\n  /src\n    /components\n    /hooks\n    /services\n    /pages\n    /styles\n/backend\n  /src\n    /controllers\n    /models\n    /routes\n    /services\n    /middleware\n/database\n  /migrations\n  /seeds\n```",
+      "testStrategy": "1. Verify all dependencies install correctly\n2. Ensure TypeScript compilation works without errors\n3. Confirm database connections are established successfully\n4. Test basic API endpoints for health checks\n5. Verify frontend builds and renders correctly\n6. Run linting and formatting checks\n7. Test CI/CD pipeline with a sample commit",
+      "priority": "high",
+      "dependencies": [],
+      "status": "in-progress",
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Implement Authentication System",
+      "description": "Develop a secure authentication system with email/password and social media login options, including user registration, login, password reset, and session management.",
+      "details": "1. Create user model in PostgreSQL with fields for email, password (hashed), name, profile information\n2. Implement JWT authentication with secure token generation and validation\n3. Develop registration endpoints with email verification\n4. Implement login functionality with rate limiting for failed attempts\n5. Set up OAuth integration for Google and Facebook login\n6. Create password reset flow with secure email links\n7. Implement session management with Redis for token storage\n8. Add two-factor authentication option\n9. Create frontend components for login, registration, and password reset\n10. Implement proper error handling and validation\n\nExample code for user model:\n```typescript\n// User model\ninterface User {\n  id: string;\n  email: string;\n  passwordHash: string;\n  firstName: string;\n  lastName: string;\n  createdAt: Date;\n  updatedAt: Date;\n  lastLogin: Date;\n  profilePicture?: string;\n  preferences: UserPreferences;\n  isEmailVerified: boolean;\n}\n\ninterface UserPreferences {\n  currency: string;\n  notificationSettings: NotificationSettings;\n  travelInterests: string[];\n}\n```",
+      "testStrategy": "1. Unit tests for authentication service functions\n2. Integration tests for registration, login, and password reset flows\n3. Security testing for password policies and brute force protection\n4. Test OAuth flows with mock social media providers\n5. Verify email verification process works correctly\n6. Test session timeout and renewal\n7. Validate proper error handling for invalid credentials\n8. Test two-factor authentication flow",
+      "priority": "high",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "User Model and Database Schema Design",
+          "description": "Design and implement the user model and database schema to store user credentials and profile information securely.",
+          "dependencies": [],
+          "details": "Create database tables for users with fields for email, hashed password, verification status, and profile data. Implement password hashing using bcrypt with appropriate salt rounds. Include audit fields (created_at, updated_at). Design schema to support both email/password and OAuth authentication methods. Write database migration scripts and implement data validation. Include unit tests for model methods and database constraints.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "JWT Authentication Implementation",
+          "description": "Implement JWT token generation, validation, and refresh mechanisms for maintaining user sessions.",
+          "dependencies": [
+            1
+          ],
+          "details": "Create JWT service with methods for token generation, verification, and refresh. Implement secure token storage with appropriate expiration times. Use environment variables for JWT secret keys. Add rate limiting for token generation endpoints. Implement token blacklisting for logout functionality. Write comprehensive tests for token validation, expiration handling, and security edge cases. Document token payload structure and security considerations.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "User Registration and Email Verification Flow",
+          "description": "Implement the user registration process with email verification to ensure valid user accounts.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Create registration endpoint with input validation and duplicate email checking. Implement email verification token generation and storage. Set up email service integration for sending verification emails. Create verification endpoint to validate tokens and activate accounts. Add rate limiting for registration attempts. Implement password strength validation. Write integration tests for the complete registration flow. Include security headers in all responses.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Login Functionality and Password Reset",
+          "description": "Implement secure login functionality with password reset capabilities and account lockout protection.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Create login endpoint with rate limiting and account lockout after failed attempts. Implement password reset flow with secure tokens and email notifications. Add session management with device tracking. Implement remember-me functionality. Create password update endpoint with current password verification. Write integration tests for login, logout, and password reset flows. Add audit logging for authentication events. Implement CSRF protection for authentication endpoints.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "OAuth Integration with Social Providers",
+          "description": "Integrate OAuth authentication with major social providers (Google, Facebook, etc.) as alternative login methods.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement OAuth client configurations for multiple providers. Create OAuth callback endpoints and user profile mapping. Handle account linking between OAuth and email accounts. Implement state parameter validation to prevent CSRF. Add proper error handling for OAuth failures. Create tests for OAuth flows with mock providers. Document required API keys and configuration. Implement security checks for token validation from OAuth providers.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Frontend Authentication Components",
+          "description": "Develop frontend components for registration, login, password reset, and profile management.",
+          "dependencies": [
+            3,
+            4,
+            5
+          ],
+          "details": "Create responsive forms for registration, login, and password management. Implement client-side validation with appropriate error messages. Add social login buttons with proper branding guidelines. Implement secure token storage in browser (HTTP-only cookies preferred). Create protected route components to restrict access to authenticated users. Develop user profile and settings pages. Write unit and integration tests for authentication components. Implement loading states and error handling for all authentication operations.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Develop Dashboard Module",
+      "description": "Create the dashboard module with itinerary management grid, search functionality, filtering options, and quick actions for creating, duplicating, and sharing itineraries.",
+      "details": "1. Design and implement responsive grid layout for itinerary cards\n2. Create itinerary card component with thumbnail, destination, dates, and action buttons\n3. Implement search functionality with real-time filtering\n4. Add sorting options (by date, alphabetical, recently modified)\n5. Develop quick action buttons (create, duplicate, delete, share)\n6. Implement confirmation dialogs for destructive actions\n7. Create empty state for new users\n8. Add loading states and skeleton loaders\n9. Implement pagination or infinite scroll for large collections\n10. Add recent activity timeline\n\nExample component structure:\n```typescript\n// Dashboard components\nconst Dashboard = () => {\n  const [itineraries, setItineraries] = useState<Itinerary[]>([]);\n  const [searchQuery, setSearchQuery] = useState('');\n  const [sortBy, setSortBy] = useState<'date' | 'name' | 'recent'>('recent');\n  \n  // Fetch itineraries logic\n  \n  return (\n    <div className=\"dashboard-container\">\n      <header className=\"dashboard-header\">\n        <h1>My Itineraries</h1>\n        <button className=\"create-button\">Create New Itinerary</button>\n      </header>\n      \n      <div className=\"search-filter-container\">\n        <SearchInput value={searchQuery} onChange={setSearchQuery} />\n        <SortOptions value={sortBy} onChange={setSortBy} />\n      </div>\n      \n      <div className=\"itinerary-grid\">\n        {itineraries.map(itinerary => (\n          <ItineraryCard \n            key={itinerary.id}\n            itinerary={itinerary}\n            onDuplicate={handleDuplicate}\n            onDelete={handleDelete}\n            onShare={handleShare}\n          />\n        ))}\n      </div>\n    </div>\n  );\n};\n```",
+      "testStrategy": "1. Unit tests for search and filter functionality\n2. Component tests for itinerary cards and grid layout\n3. Test responsive behavior across different screen sizes\n4. Verify all quick actions work correctly\n5. Test search performance with large datasets\n6. Validate proper error handling for failed API requests\n7. Test empty and loading states\n8. Verify proper rendering of itinerary thumbnails",
+      "priority": "medium",
+      "dependencies": [
+        2
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement Grid Layout and Responsive Design",
+          "description": "Create a responsive grid layout for the dashboard that adapts to different screen sizes and devices.",
+          "dependencies": [],
+          "details": "Design and implement a flexible grid system using CSS Grid or Flexbox. Ensure the layout is responsive with breakpoints for mobile (320px-480px), tablet (481px-768px), laptop (769px-1024px), and desktop (1025px+). Include container components that maintain proper spacing and alignment. Implement media queries to adjust the number of columns based on screen width. Ensure consistent margins, padding, and gutters between grid items. Test across multiple devices and browsers for compatibility.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Develop Itinerary Card Components with Actions",
+          "description": "Create reusable itinerary card components with interactive action buttons and consistent styling.",
+          "dependencies": [
+            1
+          ],
+          "details": "Design card components with consistent height/width ratios that fit within the grid layout. Include image containers with proper aspect ratios, title sections, date/time information, and status indicators. Implement action buttons (edit, delete, share, favorite) with hover/focus states. Add confirmation dialogs for destructive actions. Ensure cards display truncated content with 'read more' functionality when text exceeds available space. Implement card animations for hover/selection states. Make cards keyboard navigable for accessibility.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Implement Search, Filter, and Sort Functionality",
+          "description": "Add interactive search, filtering, and sorting capabilities to the dashboard.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Create a search input with auto-suggestions and history. Implement filters for categories, dates, status, and favorites with multi-select capabilities. Add sorting options (newest, oldest, alphabetical, popularity). Ensure filter/sort controls are collapsible on mobile. Implement client-side filtering logic with debounced search input. Create visual indicators for active filters. Design empty states for no search results. Ensure the grid updates dynamically when search/filter/sort criteria change. Add URL parameter support to make filtered views shareable.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Add Loading States and Pagination",
+          "description": "Implement loading indicators, pagination controls, and infinite scrolling for the dashboard.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Design skeleton loaders that match the card layout dimensions. Implement pagination controls with page numbers, previous/next buttons, and items-per-page selector. Add infinite scrolling as an alternative to traditional pagination. Create smooth transitions between loading and loaded states. Implement scroll position memory when navigating back to the dashboard. Add progress indicators for background operations. Ensure loading states are accessible with proper ARIA attributes. Optimize performance by implementing virtualized lists for large data sets.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Build Prompt Generator Module",
+      "description": "Develop the multi-step wizard interface for collecting travel parameters, including destination input, date selection, traveler information, preferences, budget, and external content analysis.",
+      "details": "1. Create multi-step form wizard with progress indicator\n2. Implement destination input with natural language processing\n3. Build interactive map component for location selection\n4. Develop date range picker with flexible options\n5. Create traveler composition input (count, ages, relationships)\n6. Implement interest and activity preference selection\n7. Build budget configuration with currency selection\n8. Create URL input for blog/video content analysis\n9. Implement form validation and error handling\n10. Build summary review screen before submission\n\nExample multi-step form structure:\n```typescript\nconst PromptGenerator = () => {\n  const [step, setStep] = useState(1);\n  const [formData, setFormData] = useState({\n    destination: '',\n    dateRange: { start: null, end: null },\n    travelers: [],\n    interests: [],\n    budget: { amount: 0, currency: 'USD' },\n    externalUrls: []\n  });\n  \n  const handleNext = () => setStep(prev => prev + 1);\n  const handleBack = () => setStep(prev => prev - 1);\n  \n  const renderStepContent = () => {\n    switch(step) {\n      case 1: return <DestinationStep data={formData} updateData={setFormData} />;\n      case 2: return <DateStep data={formData} updateData={setFormData} />;\n      case 3: return <TravelersStep data={formData} updateData={setFormData} />;\n      case 4: return <InterestsStep data={formData} updateData={setFormData} />;\n      case 5: return <BudgetStep data={formData} updateData={setFormData} />;\n      case 6: return <ExternalContentStep data={formData} updateData={setFormData} />;\n      case 7: return <ReviewStep data={formData} onSubmit={handleSubmit} />;\n      default: return null;\n    }\n  };\n  \n  return (\n    <div className=\"prompt-generator\">\n      <ProgressIndicator currentStep={step} totalSteps={7} />\n      {renderStepContent()}\n      <div className=\"navigation-buttons\">\n        {step > 1 && <button onClick={handleBack}>Back</button>}\n        {step < 7 ? <button onClick={handleNext}>Next</button> : <button onClick={handleSubmit}>Generate Itinerary</button>}\n      </div>\n    </div>\n  );\n};\n```",
+      "testStrategy": "1. Unit tests for form validation logic\n2. Component tests for each step of the wizard\n3. Test form state persistence between steps\n4. Verify natural language processing for destination input\n5. Test map interaction for location selection\n6. Validate URL processing for external content\n7. Test error handling for invalid inputs\n8. Verify summary screen accurately displays all inputs",
+      "priority": "high",
+      "dependencies": [
+        2
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Multi-step form architecture",
+          "description": "Design and implement the core architecture for the multi-step form wizard",
+          "dependencies": [],
+          "details": "Create the overall structure for the multi-step form including navigation between steps, progress tracking, and global state management. Implement the form container component that will house all steps. Define the step transition logic and persistence of data between steps. Include error handling and form submission architecture. Ensure the architecture supports conditional rendering of steps based on previous inputs.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Destination/map integration",
+          "description": "Implement the destination selection interface with interactive map integration",
+          "dependencies": [
+            1
+          ],
+          "details": "Integrate a map API (like Google Maps or Mapbox) for destination selection. Create UI components for searching locations, displaying map markers, and selecting regions. Implement geocoding functionality to convert user inputs to coordinates and vice versa. Add validation to ensure a valid destination is selected before proceeding. Store selected destination data in the form state with proper formatting for API consumption.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Traveler and date inputs",
+          "description": "Build the traveler information and date selection components",
+          "dependencies": [
+            1
+          ],
+          "details": "Create form components for inputting traveler information (number of adults, children, etc.) with appropriate validation. Implement date range picker for trip duration with validation for minimum/maximum stays and invalid date combinations. Add logic to calculate trip duration and store in state. Include conditional fields that appear based on traveler selections. Ensure all inputs are properly validated before allowing progression to next steps.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Preferences/budget configuration",
+          "description": "Develop the travel preferences and budget configuration interface",
+          "dependencies": [
+            1,
+            3
+          ],
+          "details": "Create UI components for selecting travel preferences (activities, accommodation types, transportation). Implement budget range selector with appropriate validation and formatting. Add interest tags selection mechanism with search functionality. Build conditional preference options that appear based on previous selections. Implement state management for all preference selections and ensure they're properly formatted for the prompt generation algorithm.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "External content analysis",
+          "description": "Implement functionality to analyze external content for personalized recommendations",
+          "dependencies": [
+            1,
+            4
+          ],
+          "details": "Create interface for users to input or upload external content (social media links, previous itineraries, etc.). Implement natural language processing to extract relevant preferences and interests from the content. Build integration with the form state to incorporate extracted data into the prompt generation. Add validation for supported content types and error handling for processing failures. Include privacy controls and data handling compliance features.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Integrate OpenAI GPT-4 for Itinerary Generation",
+      "description": "Implement the AI backend service that processes user inputs from the prompt generator and creates personalized travel itineraries using the OpenAI GPT-4 API.",
+      "details": "1. Set up secure OpenAI API integration\n2. Design prompt engineering templates for itinerary generation\n3. Implement context formatting from user inputs\n4. Create structured output parsing for AI responses\n5. Build error handling and retry mechanisms\n6. Implement caching for similar requests\n7. Add rate limiting to manage API costs\n8. Create fallback mechanisms for API failures\n9. Implement logging for prompt analysis and improvement\n10. Design system for continuous prompt optimization\n\nExample prompt engineering:\n```typescript\nconst generateItineraryPrompt = (userData: UserInput): string => {\n  return `\nCreate a detailed travel itinerary for the following parameters:\n\nDestination: ${userData.destination}\nDates: ${formatDateRange(userData.dateRange)}\nTravelers: ${formatTravelers(userData.travelers)}\nInterests: ${userData.interests.join(', ')}\nBudget: ${userData.budget.amount} ${userData.budget.currency}\n\nExternal content references: ${userData.externalUrls.join('\\n')}\n\nPlease create a day-by-day itinerary with:\n1. Morning, afternoon, and evening activities\n2. Estimated costs for each activity\n3. Travel time between locations\n4. Meal recommendations\n5. Accommodation suggestions\n\nFormat the response as a structured JSON object with the following schema:\n${JSON.stringify(ITINERARY_SCHEMA, null, 2)}\n`;\n};\n\nconst generateItinerary = async (userData: UserInput): Promise<Itinerary> => {\n  const prompt = generateItineraryPrompt(userData);\n  \n  try {\n    const response = await openai.createCompletion({\n      model: \"gpt-4\",\n      prompt,\n      max_tokens: 2000,\n      temperature: 0.7,\n    });\n    \n    return parseItineraryResponse(response.choices[0].text);\n  } catch (error) {\n    console.error('Error generating itinerary:', error);\n    throw new Error('Failed to generate itinerary');\n  }\n};\n```",
+      "testStrategy": "1. Unit tests for prompt generation and response parsing\n2. Integration tests with OpenAI API using test credentials\n3. Performance testing for response time optimization\n4. Test error handling and retry mechanisms\n5. Validate output structure matches expected schema\n6. Test caching effectiveness for similar requests\n7. Verify rate limiting functionality\n8. Test with various input combinations to ensure robust handling",
+      "priority": "high",
+      "dependencies": [
+        4
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "API Integration and Security Setup",
+          "description": "Establish secure connection to OpenAI API with proper authentication and key management",
+          "dependencies": [],
+          "details": "Implement API client with secure key storage, implement rate limiting to prevent quota exhaustion, set up monitoring for API usage, create environment-specific configurations, and develop unit tests for connection reliability. Consider performance impact of connection pooling and timeout configurations.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Prompt Engineering Framework",
+          "description": "Design a flexible system for creating, testing and iterating on prompts",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a prompt template system, implement prompt versioning, develop A/B testing capability for prompt variations, establish prompt evaluation metrics, and build a test suite with sample inputs/outputs. Performance considerations include prompt length optimization and token usage analysis.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Context Formatting System",
+          "description": "Build mechanisms to properly format and structure context for API requests",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement context truncation strategies, develop context prioritization algorithms, create context validation tools, build context assembly pipeline, and test with various input types/sizes. Performance focus on minimizing token usage while maximizing relevant context retention.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Response Parsing and Validation",
+          "description": "Create robust parsers to extract structured data from API responses",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement JSON schema validation, develop fallback parsing strategies, create response normalization functions, build type-safe interfaces, and test with both valid and malformed responses. Performance considerations include parsing efficiency and memory usage.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Error Handling and Retry Logic",
+          "description": "Implement comprehensive error management and intelligent retry mechanisms",
+          "dependencies": [
+            1,
+            4
+          ],
+          "details": "Create error classification system, implement exponential backoff for retries, develop fallback response strategies, build detailed error logging, and test with simulated API failures. Performance focus on minimizing user-perceived latency during errors and optimizing retry strategies.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Response Optimization and Caching",
+          "description": "Implement caching strategies and performance optimizations",
+          "dependencies": [
+            1,
+            4,
+            5
+          ],
+          "details": "Develop semantic caching system, implement cache invalidation strategies, create cache hit/miss analytics, build parallel request optimization, and test cache effectiveness with repeated queries. Performance considerations include cache size management, TTL optimization, and measuring latency improvements.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Develop Itinerary Builder Core Components",
+      "description": "Create the main itinerary builder interface with interactive map integration, activity organization system with timeline and Kanban views, and drag-and-drop functionality.",
+      "details": "1. Integrate Google Maps API for interactive mapping\n2. Implement map display with points of interest and custom markers\n3. Create location detail panels with information and imagery\n4. Build dual-view toggle between timeline and Kanban views\n5. Implement drag-and-drop functionality for activity management\n6. Create activity cards with editable details\n7. Implement route visualization between activities\n8. Add time allocation and duration management\n9. Create activity templates for common types\n10. Implement route optimization suggestions\n\nExample drag-and-drop implementation:\n```typescript\nconst ItineraryBuilder = () => {\n  const [view, setView] = useState<'timeline' | 'kanban'>('timeline');\n  const [itinerary, setItinerary] = useState<Itinerary>(initialItinerary);\n  \n  const handleDragEnd = (result: DropResult) => {\n    const { source, destination, draggableId } = result;\n    \n    // Dropped outside a droppable area\n    if (!destination) return;\n    \n    // Same position\n    if (source.droppableId === destination.droppableId && \n        source.index === destination.index) return;\n    \n    // Moving within the same day\n    if (source.droppableId === destination.droppableId) {\n      const dayId = source.droppableId;\n      const day = itinerary.days.find(d => d.id === dayId);\n      if (!day) return;\n      \n      const newActivities = Array.from(day.activities);\n      const [movedActivity] = newActivities.splice(source.index, 1);\n      newActivities.splice(destination.index, 0, movedActivity);\n      \n      const newDays = itinerary.days.map(d => \n        d.id === dayId ? { ...d, activities: newActivities } : d\n      );\n      \n      setItinerary({ ...itinerary, days: newDays });\n      return;\n    }\n    \n    // Moving between days\n    const sourceDay = itinerary.days.find(d => d.id === source.droppableId);\n    const destDay = itinerary.days.find(d => d.id === destination.droppableId);\n    if (!sourceDay || !destDay) return;\n    \n    const sourceActivities = Array.from(sourceDay.activities);\n    const [movedActivity] = sourceActivities.splice(source.index, 1);\n    \n    const destActivities = Array.from(destDay.activities);\n    destActivities.splice(destination.index, 0, movedActivity);\n    \n    const newDays = itinerary.days.map(d => {\n      if (d.id === source.droppableId) return { ...d, activities: sourceActivities };\n      if (d.id === destination.droppableId) return { ...d, activities: destActivities };\n      return d;\n    });\n    \n    setItinerary({ ...itinerary, days: newDays });\n  };\n  \n  return (\n    <div className=\"itinerary-builder\">\n      <div className=\"view-toggle\">\n        <button onClick={() => setView('timeline')} className={view === 'timeline' ? 'active' : ''}>Timeline</button>\n        <button onClick={() => setView('kanban')} className={view === 'kanban' ? 'active' : ''}>Kanban</button>\n      </div>\n      \n      <div className=\"builder-container\">\n        <div className=\"map-container\">\n          <GoogleMap \n            markers={getMarkersFromItinerary(itinerary)}\n            onMarkerDrag={handleMarkerDrag}\n            onLocationSelect={handleLocationSelect}\n          />\n        </div>\n        \n        <DragDropContext onDragEnd={handleDragEnd}>\n          {view === 'timeline' ? (\n            <TimelineView itinerary={itinerary} />\n          ) : (\n            <KanbanView itinerary={itinerary} />\n          )}\n        </DragDropContext>\n      </div>\n    </div>\n  );\n};\n```",
+      "testStrategy": "1. Unit tests for drag-and-drop functionality\n2. Component tests for map integration\n3. Test timeline and Kanban view switching\n4. Verify activity card rendering and editing\n5. Test route visualization accuracy\n6. Validate map marker placement and interaction\n7. Test performance with large numbers of activities\n8. Verify responsive behavior across different screen sizes",
+      "priority": "high",
+      "dependencies": [
+        3,
+        5
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Google Maps Integration",
+          "description": "Implement Google Maps API integration for location search, geocoding, and map display within the itinerary builder",
+          "dependencies": [],
+          "details": "Set up Google Maps JavaScript API with proper API key management. Create a MapService utility to handle API calls. Implement location search with autocomplete functionality. Build a reusable Map component that can display markers, routes, and handle user interactions. Include geocoding/reverse geocoding to convert between addresses and coordinates. Ensure proper error handling for API limits and failed requests.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Timeline View Implementation",
+          "description": "Create a chronological timeline view to display itinerary activities with time slots",
+          "dependencies": [
+            1
+          ],
+          "details": "Develop a responsive timeline component with day/hour grid. Implement a TimelineContainer component to manage timeline state and data. Create TimeSlot components that can display activities at specific times. Add visual indicators for morning/afternoon/evening. Include zoom functionality to adjust time granularity. Implement scroll/navigation controls for multi-day itineraries. Connect to the central state management to reflect changes from other views.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Kanban View Implementation",
+          "description": "Build a Kanban board view to organize activities by categories or days",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a KanbanBoard container component with column management. Implement KanbanColumn components for different categories (days, activity types, etc.). Design the state management to sync with the timeline view. Add column customization options (add/remove/rename). Include column capacity indicators and warnings. Ensure responsive design for different screen sizes. Connect to the central state management system to maintain consistency with timeline view.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Activity Card Components",
+          "description": "Design and implement reusable activity card components for both timeline and Kanban views",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Create an ActivityCard component with consistent styling across views. Implement edit/delete functionality within cards. Add duration controls and time adjustment UI. Include location display with map preview. Design expandable/collapsible card states for detailed information. Add visual indicators for activity types (dining, sightseeing, etc.). Implement status indicators (confirmed, tentative, etc.). Ensure accessibility compliance for all interactive elements.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Drag-and-Drop Functionality",
+          "description": "Implement drag-and-drop interactions for rearranging activities in both timeline and Kanban views",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "Integrate a drag-and-drop library (react-dnd or react-beautiful-dnd). Implement drag handlers for activity cards in both views. Create drop zones in timeline slots and Kanban columns. Handle state updates when items are moved. Add visual feedback during drag operations. Implement validation to prevent invalid drops (time conflicts, etc.). Ensure performance optimization for smooth dragging experience. Add undo/redo functionality for drag operations.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Route Visualization",
+          "description": "Develop route visualization between activities on the map with travel time estimation",
+          "dependencies": [
+            1,
+            4
+          ],
+          "details": "Extend the Map component to display routes between activity locations. Implement Google Directions API integration for route calculation. Create a RouteService to handle route data and caching. Add travel time and distance estimation between activities. Implement different transportation mode options. Design visual indicators for route segments on the map. Create a route summary panel with total distance and time. Handle route recalculation when activities are reordered.",
+          "status": "pending"
+        },
+        {
+          "id": 7,
+          "title": "Optimization Suggestions",
+          "description": "Implement an algorithm to suggest itinerary optimizations based on location proximity and time constraints",
+          "dependencies": [
+            1,
+            4,
+            6
+          ],
+          "details": "Create an OptimizationService to analyze itinerary efficiency. Implement algorithms to detect inefficient routes or scheduling. Design suggestion cards with actionable recommendations. Add one-click application of suggestions. Implement a scoring system for itinerary efficiency. Create visualization of before/after optimization comparisons. Handle user preferences for optimization priorities (minimize travel, maximize sightseeing, etc.). Ensure suggestions update when itinerary changes.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Implement AI Chat Assistant",
+      "description": "Develop the context-aware AI chat assistant that can provide recommendations, answer questions, and analyze external content within the itinerary builder.",
+      "details": "1. Create chat interface component with message history\n2. Implement context-aware prompting with itinerary data\n3. Build recommendation engine for activities and restaurants\n4. Develop URL processing for external content analysis\n5. Implement problem-solving capabilities for logistics and timing\n6. Create typing indicators and loading states\n7. Add message persistence and history\n8. Implement error handling for failed AI requests\n9. Create structured response formatting for recommendations\n10. Add user feedback mechanisms for AI responses\n\nExample chat implementation:\n```typescript\nconst AIChatAssistant = ({ itinerary }) => {\n  const [messages, setMessages] = useState<Message[]>([]);\n  const [inputValue, setInputValue] = useState('');\n  const [isLoading, setIsLoading] = useState(false);\n  \n  const sendMessage = async (content: string) => {\n    // Add user message to chat\n    const userMessage: Message = {\n      id: generateId(),\n      sender: 'user',\n      content,\n      timestamp: new Date()\n    };\n    \n    setMessages(prev => [...prev, userMessage]);\n    setInputValue('');\n    setIsLoading(true);\n    \n    try {\n      // Prepare context for AI\n      const context = {\n        itinerary,\n        chatHistory: messages.slice(-10), // Last 10 messages for context\n        currentQuery: content\n      };\n      \n      // Check if message contains URL\n      const urls = extractUrls(content);\n      if (urls.length > 0) {\n        // Process external content\n        const contentAnalysis = await analyzeExternalContent(urls[0]);\n        context.externalContent = contentAnalysis;\n      }\n      \n      // Get AI response\n      const aiResponse = await getAIResponse(context);\n      \n      const assistantMessage: Message = {\n        id: generateId(),\n        sender: 'assistant',\n        content: aiResponse.text,\n        timestamp: new Date(),\n        suggestions: aiResponse.suggestions\n      };\n      \n      setMessages(prev => [...prev, assistantMessage]);\n    } catch (error) {\n      // Handle error\n      const errorMessage: Message = {\n        id: generateId(),\n        sender: 'system',\n        content: 'Sorry, I encountered an error. Please try again.',\n        timestamp: new Date(),\n        isError: true\n      };\n      \n      setMessages(prev => [...prev, errorMessage]);\n    } finally {\n      setIsLoading(false);\n    }\n  };\n  \n  return (\n    <div className=\"chat-assistant\">\n      <div className=\"chat-messages\">\n        {messages.map(message => (\n          <ChatMessage key={message.id} message={message} />\n        ))}\n        {isLoading && <TypingIndicator />}\n      </div>\n      \n      <div className=\"chat-input\">\n        <input \n          type=\"text\" \n          value={inputValue} \n          onChange={e => setInputValue(e.target.value)}\n          placeholder=\"Ask about your itinerary or share a link...\"\n          onKeyPress={e => e.key === 'Enter' && sendMessage(inputValue)}\n        />\n        <button onClick={() => sendMessage(inputValue)} disabled={!inputValue.trim() || isLoading}>\n          Send\n        </button>\n      </div>\n    </div>\n  );\n};\n```",
+      "testStrategy": "1. Unit tests for chat message handling\n2. Integration tests with AI service\n3. Test URL detection and content analysis\n4. Verify context-aware recommendations\n5. Test error handling and recovery\n6. Validate message persistence\n7. Test performance with long conversation histories\n8. Verify structured response formatting",
+      "priority": "medium",
+      "dependencies": [
+        5,
+        6
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Chat Interface Components Development",
+          "description": "Design and implement the UI components for the chat assistant interface",
+          "dependencies": [],
+          "details": "Create responsive chat bubbles, input field, send button, and message history display. Implement typing indicators, message timestamps, and user/assistant message differentiation. Design the layout to be accessible and mobile-friendly. Include conversation controls (clear chat, copy messages, etc.) and ensure smooth scrolling behavior for conversation history.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Context-Aware AI Integration",
+          "description": "Implement the core AI functionality with conversation context management",
+          "dependencies": [
+            1
+          ],
+          "details": "Integrate with the AI model API. Develop conversation state management to maintain context across multiple exchanges. Implement efficient token management to handle context window limitations. Create mechanisms for context prioritization and summarization for long conversations. Include conversation persistence across sessions and optimize for response time.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Recommendation Engine Implementation",
+          "description": "Build a system to provide relevant suggestions based on conversation context",
+          "dependencies": [
+            2
+          ],
+          "details": "Develop algorithms to analyze conversation content and identify relevant recommendation opportunities. Create a recommendation database or API integration. Implement relevance scoring for suggestions. Design UI components for displaying recommendations unobtrusively. Include user feedback mechanisms to improve recommendation quality over time.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "External Content Analysis System",
+          "description": "Create functionality to analyze and incorporate external content into responses",
+          "dependencies": [
+            2
+          ],
+          "details": "Implement secure file upload and URL processing capabilities. Develop content extraction and parsing for various document types (PDF, DOC, websites). Create summarization functionality for lengthy external content. Implement citation and reference tracking. Build content caching mechanisms to improve performance for repeated queries about the same content.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Response Formatting and Error Handling",
+          "description": "Implement robust response formatting and comprehensive error handling",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "Develop markdown/rich text formatting for responses. Implement syntax highlighting for code blocks. Create fallback mechanisms for AI service disruptions. Design user-friendly error messages. Implement retry logic for transient failures. Add response validation to ensure quality before displaying to users. Create logging system for errors to facilitate debugging and improvement.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Implement Real-time Collaboration Features",
+      "description": "Develop the real-time collaboration system with Socket.io, including multi-user editing, presence indicators, comments, and version history tracking.",
+      "details": "1. Set up Socket.io for real-time communication\n2. Implement user presence tracking and indicators\n3. Create operational transformation for conflict resolution\n4. Build comment system for activities and itinerary sections\n5. Implement version history tracking with user attribution\n6. Create rollback functionality for previous versions\n7. Add permission management with role-based access\n8. Implement notification system for changes and comments\n9. Create collaboration invitation system\n10. Build activity feed for recent changes\n\nExample Socket.io implementation:\n```typescript\n// Server-side\nconst setupSocketServer = (server) => {\n  const io = new Server(server);\n  \n  // Store active users by itinerary\n  const activeUsers = new Map();\n  \n  io.on('connection', (socket) => {\n    // Join itinerary room\n    socket.on('join-itinerary', ({ itineraryId, user }) => {\n      socket.join(`itinerary:${itineraryId}`);\n      \n      // Add user to active users\n      if (!activeUsers.has(itineraryId)) {\n        activeUsers.set(itineraryId, new Map());\n      }\n      activeUsers.get(itineraryId).set(socket.id, {\n        id: user.id,\n        name: user.name,\n        avatar: user.avatar,\n        focusArea: null\n      });\n      \n      // Broadcast updated user list\n      io.to(`itinerary:${itineraryId}`).emit('active-users', \n        Array.from(activeUsers.get(itineraryId).values())\n      );\n    });\n    \n    // Handle user focus area changes\n    socket.on('update-focus', ({ itineraryId, focusArea }) => {\n      const itineraryUsers = activeUsers.get(itineraryId);\n      if (itineraryUsers && itineraryUsers.has(socket.id)) {\n        const user = itineraryUsers.get(socket.id);\n        user.focusArea = focusArea;\n        \n        // Broadcast updated user list\n        io.to(`itinerary:${itineraryId}`).emit('active-users', \n          Array.from(itineraryUsers.values())\n        );\n      }\n    });\n    \n    // Handle itinerary changes\n    socket.on('itinerary-update', ({ itineraryId, operation, data }) => {\n      // Save operation to database for version history\n      saveOperation(itineraryId, operation, data, socket.id);\n      \n      // Broadcast to all other users\n      socket.to(`itinerary:${itineraryId}`).emit('itinerary-updated', {\n        operation,\n        data,\n        userId: getUserIdFromSocket(socket.id, itineraryId)\n      });\n    });\n    \n    // Handle comments\n    socket.on('add-comment', ({ itineraryId, comment }) => {\n      // Save comment to database\n      saveComment(itineraryId, comment);\n      \n      // Broadcast to all users including sender\n      io.to(`itinerary:${itineraryId}`).emit('comment-added', comment);\n    });\n    \n    // Handle disconnection\n    socket.on('disconnect', () => {\n      // Remove user from all itineraries\n      for (const [itineraryId, users] of activeUsers.entries()) {\n        if (users.has(socket.id)) {\n          users.delete(socket.id);\n          \n          // Broadcast updated user list\n          io.to(`itinerary:${itineraryId}`).emit('active-users', \n            Array.from(users.values())\n          );\n          \n          // Clean up empty itineraries\n          if (users.size === 0) {\n            activeUsers.delete(itineraryId);\n          }\n        }\n      }\n    });\n  });\n};\n```",
+      "testStrategy": "1. Unit tests for Socket.io event handlers\n2. Integration tests for real-time updates\n3. Test conflict resolution with simultaneous edits\n4. Verify user presence indicators\n5. Test comment system functionality\n6. Validate version history tracking\n7. Test rollback functionality\n8. Verify permission enforcement for different user roles",
+      "priority": "medium",
+      "dependencies": [
+        6
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Socket.io Server Setup",
+          "description": "Implement the Socket.io server infrastructure for real-time communication",
+          "dependencies": [],
+          "details": "Configure Socket.io server, establish connection handling, implement event listeners and emitters, set up namespaces and rooms for document collaboration, and implement connection state management with reconnection strategies. Include error handling and logging for connection issues.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "User Presence Tracking System",
+          "description": "Develop a system to track and display active users in collaborative sessions",
+          "dependencies": [
+            1
+          ],
+          "details": "Create user presence detection mechanisms, implement heartbeat functionality to detect disconnections, design UI indicators for active/idle/offline states, handle user join/leave events, and maintain a synchronized list of current collaborators with their editing positions.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Operational Transformation Engine",
+          "description": "Build the core OT engine to handle concurrent edits and ensure consistency",
+          "dependencies": [
+            1
+          ],
+          "details": "Implement transformation functions for insert/delete/update operations, create composition and inversion functions, design conflict resolution strategies, implement intention preservation algorithms, and optimize for performance with large documents. Include comprehensive testing for edge cases.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Commenting and Annotation System",
+          "description": "Create a real-time commenting system with thread support and notifications",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Develop comment data structures, implement comment positioning relative to document content, create thread management for nested replies, add mention functionality, implement comment resolution workflows, and ensure comments stay properly positioned during document edits.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Version History Management",
+          "description": "Implement a system to track, store, and display document version history",
+          "dependencies": [
+            3
+          ],
+          "details": "Design efficient version storage mechanisms, implement automatic versioning at appropriate intervals, create diff visualization between versions, add version metadata (timestamp, author), implement version browsing UI, and optimize storage for large documents with many versions.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Document Rollback Functionality",
+          "description": "Create functionality to revert documents to previous versions",
+          "dependencies": [
+            5
+          ],
+          "details": "Implement rollback operations that preserve the version history, handle partial rollbacks of specific changes, manage conflicts during rollback operations, provide preview functionality before committing rollbacks, and ensure proper notification to all collaborators when rollbacks occur.",
+          "status": "pending"
+        },
+        {
+          "id": 7,
+          "title": "Permissions and Access Control",
+          "description": "Develop a comprehensive permissions system for collaborative documents",
+          "dependencies": [
+            2
+          ],
+          "details": "Implement role-based access control (view/comment/edit/admin), create permission inheritance hierarchies, add time-based access controls, implement permission change propagation, design UI for permission management, and ensure real-time updates when permissions change.",
+          "status": "pending"
+        },
+        {
+          "id": 8,
+          "title": "Notification System",
+          "description": "Build a real-time notification system for collaboration events",
+          "dependencies": [
+            1,
+            4,
+            7
+          ],
+          "details": "Implement in-app notifications for comments, mentions, and document changes, create email notification digests, add customizable notification preferences, implement read/unread status tracking, design notification center UI, and ensure notifications respect user permissions.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Develop Trip Management Tools",
+      "description": "Implement the comprehensive trip management tools including flight tracking, accommodation management, budget tracking, and traveler profiles.",
+      "details": "1. Create flight information management system with API integration\n2. Build accommodation tracking with booking details\n3. Implement budget tracking with expense categorization\n4. Create traveler profile management system\n5. Build notes system with rich text formatting\n6. Implement currency conversion for international trips\n7. Create expense splitting functionality\n8. Build notification system for flight updates\n9. Implement checklist system for trip preparation\n10. Create emergency contact management\n\nExample budget tracking implementation:\n```typescript\ninterface Expense {\n  id: string;\n  category: 'accommodation' | 'food' | 'activities' | 'transportation' | 'other';\n  amount: number;\n  currency: string;\n  description: string;\n  date: Date;\n  paidBy: string; // User ID\n  splitBetween: string[]; // User IDs\n}\n\nconst BudgetTracker = ({ itinerary, travelers }) => {\n  const [expenses, setExpenses] = useState<Expense[]>([]);\n  const [budget, setBudget] = useState(itinerary.budget);\n  const [currency, setCurrency] = useState(itinerary.currency);\n  \n  useEffect(() => {\n    // Load expenses from API\n    fetchExpenses(itinerary.id).then(setExpenses);\n  }, [itinerary.id]);\n  \n  const addExpense = async (expense: Omit<Expense, 'id'>) => {\n    try {\n      const newExpense = await createExpense(itinerary.id, expense);\n      setExpenses(prev => [...prev, newExpense]);\n    } catch (error) {\n      console.error('Failed to add expense:', error);\n    }\n  };\n  \n  const calculateTotalByCategory = () => {\n    return expenses.reduce((acc, expense) => {\n      // Convert to selected currency if needed\n      const amount = expense.currency !== currency \n        ? convertCurrency(expense.amount, expense.currency, currency)\n        : expense.amount;\n      \n      acc[expense.category] = (acc[expense.category] || 0) + amount;\n      return acc;\n    }, {} as Record<string, number>);\n  };\n  \n  const calculateTotalExpenses = () => {\n    const totals = calculateTotalByCategory();\n    return Object.values(totals).reduce((sum, amount) => sum + amount, 0);\n  };\n  \n  const calculateExpensesByPerson = () => {\n    return expenses.reduce((acc, expense) => {\n      // Calculate split amount\n      const splitAmount = expense.amount / expense.splitBetween.length;\n      \n      // Add paid amount to payer\n      acc[expense.paidBy] = acc[expense.paidBy] || { paid: 0, owed: 0 };\n      acc[expense.paidBy].paid += expense.amount;\n      \n      // Add owed amounts to each person\n      expense.splitBetween.forEach(personId => {\n        acc[personId] = acc[personId] || { paid: 0, owed: 0 };\n        acc[personId].owed += splitAmount;\n      });\n      \n      return acc;\n    }, {} as Record<string, { paid: number, owed: number }>);\n  };\n  \n  return (\n    <div className=\"budget-tracker\">\n      <div className=\"budget-summary\">\n        <h2>Budget Summary</h2>\n        <div className=\"budget-progress\">\n          <ProgressBar \n            value={calculateTotalExpenses()} \n            max={budget.amount} \n            currency={currency}\n          />\n        </div>\n        <div className=\"category-breakdown\">\n          {Object.entries(calculateTotalByCategory()).map(([category, amount]) => (\n            <CategoryItem \n              key={category}\n              category={category}\n              amount={amount}\n              currency={currency}\n              percentage={(amount / budget.amount) * 100}\n            />\n          ))}\n        </div>\n      </div>\n      \n      <div className=\"expense-management\">\n        <h2>Expenses</h2>\n        <button onClick={() => setShowAddExpenseModal(true)}>Add Expense</button>\n        \n        <ExpenseList \n          expenses={expenses}\n          travelers={travelers}\n          currency={currency}\n          onDelete={handleDeleteExpense}\n          onEdit={handleEditExpense}\n        />\n      </div>\n      \n      <div className=\"settlement\">\n        <h2>Who Owes What</h2>\n        <SettlementCalculator \n          expensesByPerson={calculateExpensesByPerson()}\n          travelers={travelers}\n          currency={currency}\n        />\n      </div>\n      \n      {showAddExpenseModal && (\n        <AddExpenseModal \n          onClose={() => setShowAddExpenseModal(false)}\n          onSave={addExpense}\n          travelers={travelers}\n          categories={['accommodation', 'food', 'activities', 'transportation', 'other']}\n          currencies={availableCurrencies}\n        />\n      )}\n    </div>\n  );\n};\n```",
+      "testStrategy": "1. Unit tests for expense calculations\n2. Integration tests with flight status APIs\n3. Test budget tracking accuracy\n4. Verify accommodation management functionality\n5. Test currency conversion accuracy\n6. Validate expense splitting calculations\n7. Test notification system for flight updates\n8. Verify traveler profile management",
+      "priority": "medium",
+      "dependencies": [
+        6
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Flight Tracking Integration",
+          "description": "Develop a flight tracking component that integrates with external flight APIs to monitor flight status, delays, and gate changes.",
+          "dependencies": [],
+          "details": "Create data models for flights (airline, flight number, departure/arrival times, status). Implement API integration with services like FlightAware or Skyscanner. Include webhook handlers for real-time updates and develop a caching mechanism to reduce API calls. Design database schema for storing flight information linked to trip and traveler profiles.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Accommodation Management",
+          "description": "Build a system to track and manage accommodation bookings, including hotels, rentals, and alternative lodging.",
+          "dependencies": [],
+          "details": "Design data models for accommodations (type, location, check-in/out dates, confirmation numbers, contact info). Implement booking status tracking and develop integration with popular booking platforms (Booking.com, Airbnb). Create map visualization of accommodation locations and include document storage for reservation confirmations.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Budget Tracking System",
+          "description": "Develop a comprehensive budget tracking system with expense categorization, currency conversion, and cost sharing capabilities.",
+          "dependencies": [],
+          "details": "Create data models for expenses (amount, category, currency, payer, split method). Implement real-time currency conversion using external API. Design algorithms for expense splitting among travelers. Develop visualization components for budget vs. actual spending. Include export functionality for expense reports and receipt storage system.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Traveler Profiles",
+          "description": "Create a traveler profile system to store personal information, preferences, and travel documents.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Design data models for traveler information (contact details, document numbers, dietary restrictions, seating preferences). Implement secure storage for passport/ID information with encryption. Create permission system for information sharing between travelers. Develop integration with flight and accommodation systems for auto-filling traveler details.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Notification System",
+          "description": "Build a comprehensive notification system to alert travelers about itinerary changes, upcoming events, and important reminders.",
+          "dependencies": [
+            1,
+            2,
+            4
+          ],
+          "details": "Design notification data models (type, priority, delivery status, recipient). Implement multiple delivery channels (email, SMS, push notifications). Create templating system for different notification types. Develop scheduling system for timed notifications. Include user preference settings for notification frequency and channels.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Checklist Functionality",
+          "description": "Develop a customizable checklist system for pre-trip preparation, packing, and travel day activities.",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "Create data models for checklist templates and items (category, completion status, assignee, due date). Implement template library with common travel checklists. Design collaborative features for shared checklists among travelers. Develop integration with notification system for checklist reminders. Include smart suggestions based on destination, weather, and trip duration.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Implement Sharing and Export Functionality",
+      "description": "Develop the sharing and export features including PDF generation, shareable links with permission controls, and social media integration.",
+      "details": "1. Create PDF export functionality with professional formatting\n2. Implement shareable link generation with custom permissions\n3. Build social media sharing with preview images\n4. Create mobile-friendly export versions\n5. Implement offline access capabilities\n6. Build email sharing functionality\n7. Create print-optimized formatting\n8. Implement access tracking for shared itineraries\n9. Build expiration settings for shared links\n10. Create viewer-only mode for shared itineraries\n\nExample PDF generation:\n```typescript\nconst generateItineraryPDF = async (itinerary: Itinerary): Promise<Buffer> => {\n  // Create a new PDF document\n  const doc = new PDFDocument();\n  const buffers: Buffer[] = [];\n  \n  // Collect PDF data chunks\n  doc.on('data', buffers.push.bind(buffers));\n  \n  // Add header with title and dates\n  doc.fontSize(24).text(itinerary.title, { align: 'center' });\n  doc.fontSize(14).text(\n    `${formatDate(itinerary.startDate)} - ${formatDate(itinerary.endDate)}`,\n    { align: 'center' }\n  );\n  \n  // Add destination image if available\n  if (itinerary.coverImage) {\n    try {\n      const imageResponse = await fetch(itinerary.coverImage);\n      const imageBuffer = await imageResponse.arrayBuffer();\n      doc.image(Buffer.from(imageBuffer), {\n        fit: [500, 300],\n        align: 'center'\n      });\n    } catch (error) {\n      console.error('Failed to add cover image:', error);\n    }\n  }\n  \n  // Add overview map\n  try {\n    const mapUrl = generateStaticMapUrl(itinerary);\n    const mapResponse = await fetch(mapUrl);\n    const mapBuffer = await mapResponse.arrayBuffer();\n    doc.addPage();\n    doc.image(Buffer.from(mapBuffer), {\n      fit: [500, 400],\n      align: 'center'\n    });\n    doc.fontSize(12).text('Trip Overview Map', { align: 'center' });\n  } catch (error) {\n    console.error('Failed to add map:', error);\n  }\n  \n  // Add day-by-day itinerary\n  itinerary.days.forEach((day, index) => {\n    doc.addPage();\n    doc.fontSize(18).text(`Day ${index + 1}: ${formatDate(day.date)}`, { underline: true });\n    \n    // Add activities\n    day.activities.forEach((activity, actIndex) => {\n      doc.moveDown();\n      doc.fontSize(14).text(`${activity.startTime} - ${activity.endTime}: ${activity.title}`);\n      doc.fontSize(12).text(activity.description, { indent: 20 });\n      \n      // Add activity details\n      if (activity.location) {\n        doc.fontSize(10).text(`Location: ${activity.location}`, { indent: 20 });\n      }\n      if (activity.cost) {\n        doc.fontSize(10).text(`Cost: ${formatCurrency(activity.cost, itinerary.currency)}`, { indent: 20 });\n      }\n      \n      // Add activity notes if available\n      if (activity.notes) {\n        doc.fontSize(10).text(`Notes: ${activity.notes}`, { indent: 20, italic: true });\n      }\n    });\n  });\n  \n  // Add budget summary if available\n  if (itinerary.budget) {\n    doc.addPage();\n    doc.fontSize(18).text('Budget Summary', { underline: true });\n    \n    // Add budget breakdown by category\n    const categories = calculateBudgetByCategory(itinerary);\n    Object.entries(categories).forEach(([category, amount]) => {\n      doc.fontSize(12).text(`${category}: ${formatCurrency(amount, itinerary.currency)}`);\n    });\n    \n    // Add total budget\n    doc.moveDown();\n    doc.fontSize(14).text(\n      `Total Budget: ${formatCurrency(itinerary.budget.amount, itinerary.currency)}`,\n      { bold: true }\n    );\n  }\n  \n  // Add traveler information if available\n  if (itinerary.travelers && itinerary.travelers.length > 0) {\n    doc.addPage();\n    doc.fontSize(18).text('Traveler Information', { underline: true });\n    \n    itinerary.travelers.forEach(traveler => {\n      doc.moveDown();\n      doc.fontSize(14).text(traveler.name);\n      if (traveler.contact) {\n        doc.fontSize(10).text(`Contact: ${traveler.contact}`, { indent: 20 });\n      }\n      if (traveler.notes) {\n        doc.fontSize(10).text(`Notes: ${traveler.notes}`, { indent: 20 });\n      }\n    });\n  }\n  \n  // Finalize the PDF\n  doc.end();\n  \n  // Return a promise that resolves with the PDF buffer\n  return new Promise((resolve, reject) => {\n    doc.on('end', () => {\n      resolve(Buffer.concat(buffers));\n    });\n    doc.on('error', reject);\n  });\n};\n\nconst handleExportPDF = async (itineraryId: string) => {\n  try {\n    setIsExporting(true);\n    \n    // Fetch complete itinerary data\n    const itinerary = await fetchItineraryDetails(itineraryId);\n    \n    // Generate PDF\n    const pdfBuffer = await generateItineraryPDF(itinerary);\n    \n    // Create download link\n    const blob = new Blob([pdfBuffer], { type: 'application/pdf' });\n    const url = URL.createObjectURL(blob);\n    \n    // Create and click download link\n    const link = document.createElement('a');\n    link.href = url;\n    link.download = `${itinerary.title.replace(/\\s+/g, '_')}_itinerary.pdf`;\n    document.body.appendChild(link);\n    link.click();\n    document.body.removeChild(link);\n    \n    // Clean up\n    URL.revokeObjectURL(url);\n  } catch (error) {\n    console.error('Failed to export PDF:', error);\n    setExportError('Failed to generate PDF. Please try again.');\n  } finally {\n    setIsExporting(false);\n  }\n};\n```",
+      "testStrategy": "1. Unit tests for PDF generation\n2. Test shareable link generation and permissions\n3. Verify social media preview rendering\n4. Test mobile-friendly export versions\n5. Validate offline access functionality\n6. Test email sharing capabilities\n7. Verify print formatting\n8. Test access tracking for shared itineraries",
+      "priority": "low",
+      "dependencies": [
+        6,
+        8
+      ],
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement PDF Generation with Formatting",
+          "description": "Create a robust PDF export functionality that maintains consistent formatting of content",
+          "dependencies": [],
+          "details": "Develop a PDF generation service that preserves text formatting, images, tables, and other content elements. Include options for customizing headers/footers, page numbers, and document metadata. Implement template system for different PDF styles. Security considerations: Ensure no sensitive metadata is embedded in PDFs. Testing requirements: Verify rendering across different content types, test large documents for performance issues, validate PDF compliance with accessibility standards.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Build Shareable Link System with Permissions",
+          "description": "Develop a secure system for generating and managing shareable links with granular permission controls",
+          "dependencies": [
+            1
+          ],
+          "details": "Create functionality to generate unique, secure URLs for content sharing. Implement permission levels (view-only, comment, edit). Add expiration settings for links and password protection options. Security considerations: Implement proper authentication checks, prevent brute force attacks, use secure random token generation. Testing requirements: Test permission enforcement, verify link expiration works correctly, validate security against unauthorized access attempts.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Integrate Social Media Sharing",
+          "description": "Enable direct sharing to major social media platforms with customizable content previews",
+          "dependencies": [
+            2
+          ],
+          "details": "Implement sharing APIs for major platforms (Twitter, Facebook, LinkedIn, etc.). Create customizable preview cards with images and descriptions. Add UTM parameter support for tracking. Security considerations: Implement proper OAuth flows, review data shared with platforms for privacy compliance. Testing requirements: Verify correct rendering of preview cards on each platform, test sharing flow on mobile and desktop, validate tracking parameters.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Develop Email Sharing Functionality",
+          "description": "Create an email sharing system with customizable templates and recipient management",
+          "dependencies": [
+            2
+          ],
+          "details": "Build email composition interface with recipient management. Implement customizable email templates with proper content rendering. Add scheduling options for delayed sending. Security considerations: Implement rate limiting to prevent spam, validate email addresses, sanitize content. Testing requirements: Test email delivery and rendering across major email clients, verify template customization works correctly, validate handling of bounced emails.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Implement Access Tracking and Analytics",
+          "description": "Create a comprehensive system to track and analyze how shared content is accessed and used",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "Develop tracking for link access events (views, downloads, shares). Create analytics dashboard showing usage patterns and engagement metrics. Implement notification system for important events (first access, unusual activity). Security considerations: Anonymize data appropriately, implement secure storage of tracking data, ensure GDPR compliance. Testing requirements: Verify accurate tracking across different access methods, test dashboard with large datasets, validate notification system reliability.",
+          "status": "pending"
+        }
+      ]
+    }
+  ]
+}
